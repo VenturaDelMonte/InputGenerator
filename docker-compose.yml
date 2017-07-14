@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  generator:
+    build: ./InputGenerator
+    environment:
+      host: rabbitmq
+      post: 5672
+    depends_on:
+      - rabbitmq
+    links:
+      - rabbitmq
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: rabbitmq-host
+    ports:
+      - 5001:15672 # Dashboard
+      - 5672:5672  # Producer and Consumer

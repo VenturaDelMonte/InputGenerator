@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/InputGenerator.iml" filepath="$PROJECT_DIR$/.idea/modules/InputGenerator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/InputGenerator_main.iml" filepath="$PROJECT_DIR$/.idea/modules/InputGenerator_main.iml" group="InputGenerator" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/InputGenerator_test.iml" filepath="$PROJECT_DIR$/.idea/modules/InputGenerator_test.iml" group="InputGenerator" />
+    </modules>
+  </component>
+</project>
