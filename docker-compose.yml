@@ -3,6 +3,9 @@ version: '3'
 services:
   generator:
     build: ./InputGenerator
+    container_name: generator
+    volumes:
+      - ./InputGenerator/datasets:/datasets/
     environment:
       host: rabbitmq
       post: 5672
@@ -14,6 +17,7 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     hostname: rabbitmq-host
+    container_name: rabbitmq
     ports:
       - 5001:15672 # Dashboard
       - 5672:5672  # Producer and Consumer
