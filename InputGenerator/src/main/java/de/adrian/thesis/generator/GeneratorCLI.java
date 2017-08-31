@@ -7,9 +7,20 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 public class GeneratorCLI {
+
+    private static final Map<String, RabbitMQGenerator> GENERATORS = new HashMap<>(3);
+
+    static {
+        GENERATORS.put("numbers", new GeneratorIncrementalCounting());
+        GENERATORS.put("numberdStrings", new GeneratorNumberedStrings());
+        GENERATORS.put("csv", new GeneratorFromCSV());
+    }
+
     @Parameter(names = {"-c", "--class"}, required = true, description = "StringGenerator class, that should be started")
     private String generatorClass;
 
@@ -39,20 +50,12 @@ public class GeneratorCLI {
 
     private void startGenerator(String[] args) throws InterruptedException {
 
-        RabbitMQGenerator generator;
+        RabbitMQGenerator generator = GENERATORS.get(generatorClass);
 
-        switch (generatorClass) {
-            case "numbers":
-                generator = new GeneratorIncrementalCounting();
-                break;
-            case "numberedString":
-                generator = new GeneratorNumberedStrings();
-                break;
-            case "csv":
-                generator = new GeneratorFromCSV();
-                break;
-            default:
-                throw new IllegalArgumentException("No StringGenerator with the name: " + generatorClass);
+        if (generator == null) {
+            throw new IllegalArgumentException("No StringGenerator with the name: " + generatorClass);
+        } else {
+            System.out.printf("Selected '%s'\n", generator);
         }
 
         setupArgumentsForGenerator(args, generator);

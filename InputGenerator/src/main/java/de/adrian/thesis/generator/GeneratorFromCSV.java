@@ -1,6 +1,5 @@
 package de.adrian.thesis.generator;
 
-import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.rabbitmq.client.Channel;
 
@@ -47,5 +46,10 @@ public class GeneratorFromCSV implements GeneratorCLI.RabbitMQGenerator {
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
     }
 }

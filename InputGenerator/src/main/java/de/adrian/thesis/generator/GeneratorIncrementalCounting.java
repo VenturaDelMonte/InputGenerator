@@ -7,4 +7,9 @@ public class GeneratorIncrementalCounting extends AbstractRabbitMQGenerator {
     GeneratorIncrementalCounting() {
         super(String::valueOf);
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
+    }
 }
