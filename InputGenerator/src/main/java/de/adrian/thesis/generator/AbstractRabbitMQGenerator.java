@@ -1,6 +1,7 @@
 package de.adrian.thesis.generator;
 
 import com.beust.jcommander.Parameter;
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 
 import java.io.IOException;
@@ -29,9 +30,13 @@ class AbstractRabbitMQGenerator implements GeneratorCLI.RabbitMQGenerator {
 
         while (true) {
 
+            // String corrId = java.util.UUID.randomUUID().toString();
+            AMQP.BasicProperties props =
+                    new AMQP.BasicProperties().builder().correlationId(String.valueOf(messagesSent)).build();
+
             message = stringGenerator.generateStringFromMessageID(messagesSent);
 
-            channel.basicPublish("", queueName, null, message.getBytes());
+            channel.basicPublish("", queueName, props, message.getBytes());
             System.out.println("[x] Sent '" + message + "'");
 
             // Exit, when max number of messages has been reached

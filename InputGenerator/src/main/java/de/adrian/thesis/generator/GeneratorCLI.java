@@ -17,7 +17,7 @@ public class GeneratorCLI {
 
     static {
         GENERATORS.put("numbers", new GeneratorIncrementalCounting());
-        GENERATORS.put("numberdStrings", new GeneratorNumberedStrings());
+        GENERATORS.put("numberedStrings", new GeneratorNumberedStrings());
         GENERATORS.put("csv", new GeneratorFromCSV());
     }
 
@@ -86,7 +86,7 @@ public class GeneratorCLI {
 
             channel = connection.createChannel();
 
-            channel.queueDeclare(queueName, false, false, false, null);
+            channel.queueDeclare(queueName, true, false, false, null);
 
             generator.startSending(channel, queueName);
 
