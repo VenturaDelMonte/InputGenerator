@@ -18,6 +18,8 @@ public class GeneratorFromCSV implements GeneratorCLI.RabbitMQGenerator {
     @Parameter(names = {"-l", "--maxLines"}, description = "Maximum number that should be processed from the input file")
     private long maxLines = -1;
 
+    private volatile boolean running = true;
+
     @Override
     public void startSending(Channel channel, String queueName) throws IOException, InterruptedException {
         processFile(channel, queueName);
@@ -32,7 +34,7 @@ public class GeneratorFromCSV implements GeneratorCLI.RabbitMQGenerator {
 
             System.out.printf("Starting to produce requests from file %s\n", file);
 
-            while ((line = input.readLine()) != null) {
+            while ((line = input.readLine()) != null && running) {
                 channel.basicPublish("", queueName, null, line.getBytes());
 
                 // Exit, when max lines to process has been reached
@@ -46,6 +48,11 @@ public class GeneratorFromCSV implements GeneratorCLI.RabbitMQGenerator {
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void stopSending() {
+        running = false;
     }
 
     @Override

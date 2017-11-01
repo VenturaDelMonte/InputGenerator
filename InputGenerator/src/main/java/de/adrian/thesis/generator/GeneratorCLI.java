@@ -9,6 +9,7 @@ import com.rabbitmq.client.ConnectionFactory;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeoutException;
 
 public class GeneratorCLI {
@@ -33,6 +34,8 @@ public class GeneratorCLI {
     @Parameter(names = {"-h", "--host"}, description = "Host name of the RabbitMQ instance")
     private String host = "localhost";
 
+    private final Semaphore wait = new Semaphore(0);
+
     public static void main(String[] args) throws Exception {
 
         GeneratorCLI cli = new GeneratorCLI();
@@ -51,6 +54,8 @@ public class GeneratorCLI {
     private void startGenerator(String[] args) throws InterruptedException {
 
         RabbitMQGenerator generator = GENERATORS.get(generatorClass);
+
+        registerShutdownHook(generator);
 
         if (generator == null) {
             throw new IllegalArgumentException("No StringGenerator with the name: " + generatorClass);
@@ -95,19 +100,32 @@ public class GeneratorCLI {
         } catch (TimeoutException | IOException e) {
             e.printStackTrace();
         } finally {
-            if (channel != null) {
+            if (channel != null && channel.isOpen()) {
                 try {
                     channel.close();
                 } catch (IOException | TimeoutException e) {
                     e.printStackTrace();
                 }
             }
+
+            wait.release();
         }
 
         System.out.printf("Finished sending to %s:%d \"%s\"\n", host, port, queueName);
     }
 
+    private void registerShutdownHook(RabbitMQGenerator generator) {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            generator.stopSending();
+            try {
+                wait.acquire();
+            } catch (InterruptedException ignored) { ignored.printStackTrace(); }
+        }));
+    }
+
     public interface RabbitMQGenerator {
         void startSending(Channel channel, String queueName) throws IOException, InterruptedException;
+
+        void stopSending();
     }
 }

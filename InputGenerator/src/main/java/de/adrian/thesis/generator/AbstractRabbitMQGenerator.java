@@ -16,6 +16,8 @@ class AbstractRabbitMQGenerator implements GeneratorCLI.RabbitMQGenerator {
 
     private final StringGenerator stringGenerator;
 
+    private volatile boolean running = true;
+
     AbstractRabbitMQGenerator(StringGenerator stringGenerator) {
         this.stringGenerator = stringGenerator;
     }
@@ -28,7 +30,7 @@ class AbstractRabbitMQGenerator implements GeneratorCLI.RabbitMQGenerator {
 
         long messagesSent = 0;
 
-        while (true) {
+        while (running) {
 
             // String corrId = java.util.UUID.randomUUID().toString();
             AMQP.BasicProperties props =
@@ -46,6 +48,11 @@ class AbstractRabbitMQGenerator implements GeneratorCLI.RabbitMQGenerator {
 
             Thread.sleep(msDelay);
         }
+    }
+
+    @Override
+    public void stopSending() {
+        running = false;
     }
 
     public interface StringGenerator {
