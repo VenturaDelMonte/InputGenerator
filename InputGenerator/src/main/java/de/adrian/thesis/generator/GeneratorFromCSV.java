@@ -18,7 +18,7 @@ public class GeneratorFromCSV implements GeneratorCLI.RabbitMQGenerator {
     @Parameter(names = {"-l", "--maxLines"}, description = "Maximum number that should be processed from the input file")
     private long maxLines = -1;
 
-    private volatile boolean running = true;
+    private volatile boolean running = false;
 
     @Override
     public void startSending(Channel channel, String queueName) throws IOException, InterruptedException {
@@ -26,6 +26,8 @@ public class GeneratorFromCSV implements GeneratorCLI.RabbitMQGenerator {
     }
 
     private void processFile(Channel channel, String queueName) {
+
+        running = true;
 
         try (BufferedReader input = new BufferedReader(new FileReader(file))) {
 
@@ -53,6 +55,11 @@ public class GeneratorFromCSV implements GeneratorCLI.RabbitMQGenerator {
     @Override
     public void stopSending() {
         running = false;
+    }
+
+    @Override
+    public boolean isRunning() {
+        return running;
     }
 
     @Override

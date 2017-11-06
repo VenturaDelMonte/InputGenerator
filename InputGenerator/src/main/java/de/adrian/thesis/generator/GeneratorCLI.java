@@ -116,10 +116,12 @@ public class GeneratorCLI {
 
     private void registerShutdownHook(RabbitMQGenerator generator) {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            generator.stopSending();
-            try {
-                wait.acquire();
-            } catch (InterruptedException ignored) { ignored.printStackTrace(); }
+            if (generator.isRunning()) {
+                generator.stopSending();
+                try {
+                    wait.acquire();
+                } catch (InterruptedException exception) { exception.printStackTrace(); }
+            }
         }));
     }
 
@@ -127,5 +129,7 @@ public class GeneratorCLI {
         void startSending(Channel channel, String queueName) throws IOException, InterruptedException;
 
         void stopSending();
+
+        boolean isRunning();
     }
 }

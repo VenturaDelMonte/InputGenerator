@@ -14,9 +14,12 @@ class AbstractRabbitMQGenerator implements GeneratorCLI.RabbitMQGenerator {
     @Parameter(names = {"-m", "--maxMessages"}, description = "Maximum number of messages, that should be generated")
     private long maxMessages = -1;
 
+    @Parameter(names = {"-co", "--correlationIDs"}, description = "Whether RabbitMQ should send correlationIDs (Necessary for checkpointing).", arity = 1)
+    private boolean useCorrelationIds = true;
+
     private final StringGenerator stringGenerator;
 
-    private volatile boolean running = true;
+    private volatile boolean running = false;
 
     AbstractRabbitMQGenerator(StringGenerator stringGenerator) {
         this.stringGenerator = stringGenerator;
@@ -26,15 +29,22 @@ class AbstractRabbitMQGenerator implements GeneratorCLI.RabbitMQGenerator {
     public void startSending(Channel channel, String queueName) throws IOException, InterruptedException {
         String message;
 
-        System.out.printf("Starting to produce messages with delay %d\n", msDelay);
+        System.out.printf("Starting to produce messages with delay %d (correlationIDs: %b)\n",
+                msDelay, useCorrelationIds);
 
         long messagesSent = 0;
+        running = true;
 
         while (running) {
 
-            // String corrId = java.util.UUID.randomUUID().toString();
-            AMQP.BasicProperties props =
-                    new AMQP.BasicProperties().builder().correlationId(String.valueOf(messagesSent)).build();
+            AMQP.BasicProperties props;
+            if (useCorrelationIds) {
+                // String corrId = java.util.UUID.randomUUID().toString();
+                props = new AMQP.BasicProperties().builder().correlationId(String.valueOf(messagesSent)).build();
+            } else {
+                props = null;
+            }
+
 
             message = stringGenerator.generateStringFromMessageID(messagesSent);
 
@@ -53,6 +63,11 @@ class AbstractRabbitMQGenerator implements GeneratorCLI.RabbitMQGenerator {
     @Override
     public void stopSending() {
         running = false;
+    }
+
+    @Override
+    public boolean isRunning() {
+        return running;
     }
 
     public interface StringGenerator {
