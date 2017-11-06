@@ -17,6 +17,9 @@ class AbstractRabbitMQGenerator implements GeneratorCLI.RabbitMQGenerator {
     @Parameter(names = {"-co", "--correlationIDs"}, description = "Whether RabbitMQ should send correlationIDs (Necessary for checkpointing).", arity = 1)
     private boolean useCorrelationIds = true;
 
+    @Parameter(names = {"-e", "--every"}, description = "Only print every x-th 'message send' statement. Set to '1' to print every successful sent.")
+    private int modulePrint = 50;
+
     private final StringGenerator stringGenerator;
 
     private volatile boolean running = false;
@@ -49,7 +52,15 @@ class AbstractRabbitMQGenerator implements GeneratorCLI.RabbitMQGenerator {
             message = stringGenerator.generateStringFromMessageID(messagesSent);
 
             channel.basicPublish("", queueName, props, message.getBytes());
-            System.out.println("[x] Sent '" + message + "'");
+
+            // If delay is smaller than certain threshold, printing to std.out will block sending unnecessarily
+            if (msDelay <= 50) {
+                if ((messagesSent % modulePrint) == 0) {
+                    System.out.println("[x] Sent '" + message + "'");
+                }
+            } else {
+                System.out.println("[x] Sent '" + message + "'");
+            }
 
             // Exit, when max number of messages has been reached
             if (++messagesSent == maxMessages) {
