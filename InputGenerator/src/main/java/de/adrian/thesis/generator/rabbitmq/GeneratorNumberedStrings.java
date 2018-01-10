@@ -1,4 +1,4 @@
-package de.adrian.thesis.generator;
+package de.adrian.thesis.generator.rabbitmq;
 
 public class GeneratorNumberedStrings extends AbstractRabbitMQGenerator {
     GeneratorNumberedStrings() {

@@ -1,4 +1,4 @@
-package de.adrian.thesis.generator;
+package de.adrian.thesis.generator.rabbitmq;
 
 /**
  * Sends the current message number as string to RabbitMQ.

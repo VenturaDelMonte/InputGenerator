@@ -1,4 +1,4 @@
-package de.adrian.thesis.generator;
+package de.adrian.thesis.generator.rabbitmq;
 
 import com.beust.jcommander.Parameter;
 import com.rabbitmq.client.Channel;
