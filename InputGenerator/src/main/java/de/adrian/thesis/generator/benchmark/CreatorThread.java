@@ -45,7 +45,9 @@ public class CreatorThread<T> extends Thread {
             T record = recordCreator.createRecord(counter);
             queue.add(record);
 
-            LOG.info("Inserted '{}' into queue", record);
+            if (properties.logMessages && counter % properties.logMessagesModulo == 0) {
+                LOG.info("Inserted '{}' into queue", record);
+            }
 
             try {
                 Thread.sleep(properties.delay);
@@ -63,20 +65,29 @@ public class CreatorThread<T> extends Thread {
     }
 
     static class CreateThreadProperties {
-        private final int delay;
-        private final long maxNumbers;
+        private int delay = 50;
+        private long maxNumbers = -1;
+        private boolean logMessages = true;
+        private int logMessagesModulo = 50;
 
-        CreateThreadProperties() {
-            this(100);
-        }
-
-        CreateThreadProperties(int delay) {
-            this(delay, -1);
-        }
-
-        CreateThreadProperties(int delay, long maxNumbers) {
+        CreateThreadProperties setDelay(int delay) {
             this.delay = delay;
+            return this;
+        }
+
+        CreateThreadProperties setMaxNumbers(long maxNumbers) {
             this.maxNumbers = maxNumbers;
+            return this;
+        }
+
+        CreateThreadProperties setLogMessages(boolean logMessages) {
+            this.logMessages = logMessages;
+            return this;
+        }
+
+        CreateThreadProperties setLogMessagesModulo(int logMessagesModulo) {
+            this.logMessagesModulo = logMessagesModulo;
+            return this;
         }
     }
 }

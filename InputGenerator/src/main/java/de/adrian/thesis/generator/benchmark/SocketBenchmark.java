@@ -36,7 +36,13 @@ public class SocketBenchmark implements ProgramFinisher {
     private int msDelay = 50;
 
     @Parameter(names = {"-m", "--maxMessages"}, description = "Max number of messages, that should be sent")
-    private int maxNumberOfMessages = 50;
+    private int maxNumberOfMessages = 500;
+
+    @Parameter(names = {"-l", "--logMessages"}, description = "Displays log messages for the creation and sending progress")
+    private boolean logMessages = true;
+
+    @Parameter(names = {"-mo", "--logModulo"}, description = "Only display log messages for only ever n-th record")
+    private int logMessagesModulo = 50;
 
     public static void main(String[] args) throws Exception {
         SocketBenchmark socketBenchmark = new SocketBenchmark();
@@ -57,12 +63,22 @@ public class SocketBenchmark implements ProgramFinisher {
 
         RecordCreator recordCreator = chooseRecordCreator(this.recordCreator);
 
-        CreatorThread.CreateThreadProperties properties =
-                new CreatorThread.CreateThreadProperties(msDelay, maxNumberOfMessages);
+        CreatorThread.CreateThreadProperties creatorProperties = new CreatorThread.CreateThreadProperties();
+        creatorProperties
+                .setDelay(msDelay)
+                .setMaxNumbers(maxNumberOfMessages)
+                .setLogMessages(logMessages)
+                .setLogMessagesModulo(logMessagesModulo);
 
-        creatorThread = new CreatorThread<String>(this, queue, recordCreator, properties);
+        creatorThread = new CreatorThread<String>(this, queue, recordCreator, creatorProperties);
 
-        forwardingThread = new ForwardingThread<>(this, queue, port);
+        ForwardingThread.ForwardingThreadProperties forwardingProperties = new ForwardingThread.ForwardingThreadProperties();
+        forwardingProperties
+                .setPort(port)
+                .setLogMessages(logMessages)
+                .setLogMessagesModulo(logMessagesModulo);
+
+        forwardingThread = new ForwardingThread<>(this, queue, forwardingProperties);
 
         creatorThread.start();
         forwardingThread.start();
@@ -89,7 +105,7 @@ public class SocketBenchmark implements ProgramFinisher {
     @Override
     public void finish(String reason) {
         if (!interrupted) {
-            LOG.info("SocketBenchmark interrupted due to '{}'" , reason);
+            LOG.info("SocketBenchmark interrupted due to '{}'", reason);
             creatorThread.stopProducing();
             forwardingThread.stopConsuming();
             interrupted = true;
