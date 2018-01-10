@@ -2,6 +2,9 @@ package de.adrian.thesis.generator.benchmark;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
+import org.slf4j.helpers.BasicMarker;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -15,6 +18,8 @@ public class ForwardingThread<T> extends Thread {
 
     private static final Logger LOG = LoggerFactory.getLogger(ForwardingThread.class);
 
+    private static final Marker THROUGHPUT_MARKER = MarkerFactory.getMarker("Throughput");
+
     private static final String THREAD_NAME = "ForwardingThread";
 
     private static final int TIMEOUT = 60_000;
@@ -23,7 +28,8 @@ public class ForwardingThread<T> extends Thread {
     private final ProgramFinisher finisher;
     private final ForwardingThreadProperties properties;
     private volatile boolean interrupted = false;
-    private long counter;
+    private long totalRecords, currentRecords;
+    private long lastTimestamp = System.currentTimeMillis();
     private ServerSocket socket;
 
     ForwardingThread(ProgramFinisher finisher, BlockingQueue<T> queue, ForwardingThreadProperties properties) {
@@ -53,8 +59,18 @@ public class ForwardingThread<T> extends Thread {
                 outputStream.write(record + "\n");
                 outputStream.flush();
 
-                if (properties.logMessages && counter++ % properties.logMessagesModulo == 0) {
+                if (properties.logMessages && totalRecords++ % properties.logMessagesModulo == 0) {
                     LOG.info("ForwardingThread consumed '{}'", record);
+                }
+
+                // TODO Or use System.nanoTime()? Measure computational overhead
+                currentRecords++;
+                long currentTime = System.currentTimeMillis();
+
+                if (lastTimestamp + 1_000 < currentTime) {
+                    LOG.info(THROUGHPUT_MARKER, "Processed {} records at {}", currentRecords, currentTime);
+                    currentRecords = 0;
+                    lastTimestamp = currentTime;
                 }
             }
 
@@ -85,6 +101,7 @@ public class ForwardingThread<T> extends Thread {
         private int port;
         private boolean logMessages = true;
         private int logMessagesModulo = 50;
+        private boolean logThroughput;
 
         public ForwardingThreadProperties setPort(int port) {
             this.port = port;
@@ -98,6 +115,11 @@ public class ForwardingThread<T> extends Thread {
 
         public ForwardingThreadProperties setLogMessagesModulo(int logMessagesModulo) {
             this.logMessagesModulo = logMessagesModulo;
+            return this;
+        }
+
+        public ForwardingThreadProperties setLogThroughput(boolean logThroughput) {
+            this.logThroughput = logThroughput;
             return this;
         }
     }

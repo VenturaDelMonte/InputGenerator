@@ -12,6 +12,10 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
+/**
+ * Creates two simples thread, one for creating records and one for serving them to Flink and computing the throughput.
+ * For testing, you can create a socket with netcat via {@code nc localhost 9117 -N}
+ */
 public class SocketBenchmark implements ProgramFinisher {
 
     private static final Logger LOG = LoggerFactory.getLogger(SocketBenchmark.class);
@@ -44,6 +48,9 @@ public class SocketBenchmark implements ProgramFinisher {
     @Parameter(names = {"-mo", "--logModulo"}, description = "Only display log messages for only ever n-th record")
     private int logMessagesModulo = 50;
 
+    @Parameter(names = {"-t", "--throughput"}, description = "Logs throughput for ForwardingThread")
+    private boolean throughput = true;
+
     public static void main(String[] args) throws Exception {
         SocketBenchmark socketBenchmark = new SocketBenchmark();
         socketBenchmark.parseCLI(args);
@@ -75,6 +82,7 @@ public class SocketBenchmark implements ProgramFinisher {
         ForwardingThread.ForwardingThreadProperties forwardingProperties = new ForwardingThread.ForwardingThreadProperties();
         forwardingProperties
                 .setPort(port)
+                .setLogThroughput(throughput)
                 .setLogMessages(logMessages)
                 .setLogMessagesModulo(logMessagesModulo);
 
