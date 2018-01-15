@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
-import org.slf4j.helpers.BasicMarker;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -48,29 +47,31 @@ public class ForwardingThread<T> extends Thread {
 
             LOG.info("Waiting for connections on port {}...", properties.port);
 
-            Socket client = socket.accept();
+            try (Socket client = socket.accept()) {
 
-            PrintWriter outputStream = new PrintWriter(client.getOutputStream());
+                try (PrintWriter outputStream = new PrintWriter(client.getOutputStream())) {
 
-            while (!interrupted && !outputStream.checkError()) {
+                    while (!interrupted && !outputStream.checkError()) {
 
-                T record = queue.poll(TIMEOUT, TimeUnit.SECONDS);
+                        T record = queue.poll(TIMEOUT, TimeUnit.SECONDS);
 
-                outputStream.write(record + "\n");
-                outputStream.flush();
+                        outputStream.write(record + "\n");
+                        outputStream.flush();
 
-                if (properties.logMessages && totalRecords++ % properties.logMessagesModulo == 0) {
-                    LOG.info("ForwardingThread consumed '{}'", record);
-                }
+                        if (properties.logMessages && totalRecords++ % properties.logMessagesModulo == 0) {
+                            LOG.info("ForwardingThread consumed '{}'", record);
+                        }
 
-                // TODO Or use System.nanoTime()? Measure computational overhead
-                currentRecords++;
-                long currentTime = System.currentTimeMillis();
+                        // TODO Or use System.nanoTime()? Measure computational overhead
+                        currentRecords++;
+                        long currentTime = System.currentTimeMillis();
 
-                if (lastTimestamp + 1_000 < currentTime) {
-                    LOG.info(THROUGHPUT_MARKER, "Processed {} records at {}", currentRecords, currentTime);
-                    currentRecords = 0;
-                    lastTimestamp = currentTime;
+                        if (lastTimestamp + 1_000 < currentTime) {
+                            LOG.info(THROUGHPUT_MARKER, "Processed {} records at {}", currentRecords, currentTime);
+                            currentRecords = 0;
+                            lastTimestamp = currentTime;
+                        }
+                    }
                 }
             }
 
@@ -79,9 +80,9 @@ public class ForwardingThread<T> extends Thread {
         } catch (InterruptedIOException exception) {
             LOG.error("Timeout after one minute...");
         } catch (IOException e) {
-            LOG.error("Error sending element from queue over socket: {}", e.getMessage());
+            LOG.error("Error sending element from queue over socket: {}", e);
         } catch (InterruptedException e) {
-            LOG.error("InterruptedException in ForwardingThread: {}", e.getMessage());
+            LOG.error("InterruptedException in ForwardingThread: {}", e);
         }
 
         finisher.finish("ForwardingThread finished");
@@ -91,7 +92,9 @@ public class ForwardingThread<T> extends Thread {
         this.interrupt();
         interrupted = true;
         try {
-            socket.close();
+            if (socket != null) {
+                socket.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
