@@ -1,9 +1,10 @@
 package de.adrian.thesis.generator.benchmark;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -15,9 +16,9 @@ import java.util.concurrent.TimeUnit;
 
 public class ForwardingThread<T> extends Thread {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ForwardingThread.class);
+    private static final Logger LOG = LogManager.getLogger(ForwardingThread.class);
 
-    private static final Marker THROUGHPUT_MARKER = MarkerFactory.getMarker("Throughput");
+    private static final Marker THROUGHPUT_MARKER = MarkerManager.getMarker("Throughput");
 
     private static final String THREAD_NAME = "ForwardingThread";
 

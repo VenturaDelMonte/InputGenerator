@@ -4,9 +4,8 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import de.adrian.thesis.generator.benchmark.recordcreator.CountingRecordCreator;
 import de.adrian.thesis.generator.benchmark.recordcreator.RecordCreator;
-import de.adrian.thesis.generator.rabbitmq.GeneratorCLI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +18,7 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 public class SocketBenchmark implements ProgramFinisher {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SocketBenchmark.class);
+    private static final Logger LOG = LogManager.getLogger(SocketBenchmark.class);
 
     private static final Map<String, RecordCreator> GENERATORS = new HashMap<>(4);
 
