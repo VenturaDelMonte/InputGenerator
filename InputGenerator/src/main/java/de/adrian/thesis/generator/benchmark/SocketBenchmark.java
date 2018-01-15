@@ -67,6 +67,9 @@ public class SocketBenchmark implements ProgramFinisher {
     }
 
     private void startGenerator() {
+
+        LOG.info("Starting SocketBenchmark on port {} with maxNumberOfMessages {}", port, maxNumberOfMessages);
+
         BlockingQueue<String> queue = new LinkedBlockingDeque<>();
 
         RecordCreator recordCreator = chooseRecordCreator(this.recordCreator);

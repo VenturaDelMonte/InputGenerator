@@ -20,16 +20,6 @@ public class CreatorThread<T> extends Thread {
 
     CreatorThread(ProgramFinisher finisher,
                   Queue<T> queue,
-                  RecordCreator<T> recordCreator) {
-        super(THREAD_NAME);
-        this.finisher = finisher;
-        this.queue = queue;
-        this.recordCreator = recordCreator;
-        this.properties = new CreateThreadProperties();
-    }
-
-    CreatorThread(ProgramFinisher finisher,
-                  Queue<T> queue,
                   RecordCreator<T> recordCreator,
                   CreateThreadProperties properties) {
         super(THREAD_NAME);

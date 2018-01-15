@@ -2,7 +2,7 @@
 
 echo "Starting $1 socket producers"
 
-port=9000
+port=31000
 
 for i in $(seq 1 $1)
 do

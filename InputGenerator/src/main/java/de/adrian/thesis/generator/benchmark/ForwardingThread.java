@@ -8,6 +8,7 @@ import org.apache.logging.log4j.MarkerManager;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -22,7 +23,7 @@ public class ForwardingThread<T> extends Thread {
 
     private static final String THREAD_NAME = "ForwardingThread";
 
-    private static final int TIMEOUT = 60_000;
+    private static final int TIMEOUT = 120_000;
 
     private final BlockingQueue<T> queue;
     private final ProgramFinisher finisher;
