@@ -5,7 +5,7 @@ apply plugin: 'application'
 
 sourceCompatibility = 1.8
 
-mainClassName = "de.adrian.thesis.generator.GeneratorCLI"
+mainClassName = "de.adrian.thesis.generator.rabbitmq.GeneratorCLI"
 
 repositories {
     mavenCentral()

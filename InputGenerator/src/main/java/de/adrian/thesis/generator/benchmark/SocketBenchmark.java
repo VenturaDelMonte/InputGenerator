@@ -4,6 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import de.adrian.thesis.generator.benchmark.recordcreator.CountingRecordCreator;
 import de.adrian.thesis.generator.benchmark.recordcreator.RecordCreator;
+import de.adrian.thesis.generator.rabbitmq.GeneratorCLI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +54,7 @@ public class SocketBenchmark implements ProgramFinisher {
 
     public static void main(String[] args) throws Exception {
         SocketBenchmark socketBenchmark = new SocketBenchmark();
+        socketBenchmark.registerShutdownHook();
         socketBenchmark.parseCLI(args);
         socketBenchmark.startGenerator();
     }
@@ -118,5 +120,9 @@ public class SocketBenchmark implements ProgramFinisher {
             forwardingThread.stopConsuming();
             interrupted = true;
         }
+    }
+
+    private void registerShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> finish("User aborted program execution")));
     }
 }
