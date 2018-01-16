@@ -3,6 +3,7 @@ package de.adrian.thesis.generator.benchmark;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import de.adrian.thesis.generator.benchmark.recordcreator.CountingRecordCreator;
+import de.adrian.thesis.generator.benchmark.recordcreator.CountingTimestampRecordCreator;
 import de.adrian.thesis.generator.benchmark.recordcreator.RecordCreator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,13 +29,14 @@ public class SocketBenchmark implements SocketBenchmarkCallback {
 
     static {
         GENERATORS.put("numbers", new CountingRecordCreator());
+        GENERATORS.put("timestamp", new CountingTimestampRecordCreator());
     }
 
     @Parameter(names = {"-p", "--port"}, description = "Specifies the port for this sender")
     private int port = 9117;
 
     @Parameter(names = {"-c", "--creator"}, description = "Specifies the record creator this sender should use")
-    private String recordCreator = "numbers";
+    private String recordCreator = "timestamp";
 
     @Parameter(names = {"-d", "--delay"}, description = "Delay between between insertions of new elements to queue")
     private int msDelay = 50;
