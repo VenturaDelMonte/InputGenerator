@@ -15,11 +15,15 @@
             <PatternLayout pattern="%d{HH:mm:ss.SSS} - %msg%n"/>
             <OnStartupTriggeringPolicy/>
         </RollingFile>
+        <!--<Console name="Console">-->
+            <!--<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>-->
+        <!--</Console>-->
     </Appenders>
     <Loggers>
         <Root level="DEBUG">
             <AppenderRef ref="StdOutFileLogger"/>
             <AppenderRef ref="ThroughputFileLogger"/>
+            <!--<AppenderRef ref="Console"/>-->
         </Root>
     </Loggers>
 </Configuration>
