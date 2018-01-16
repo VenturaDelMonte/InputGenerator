@@ -16,7 +16,7 @@ import java.util.concurrent.LinkedBlockingDeque;
  * Creates two simples thread, one for creating records and one for serving them to Flink and computing the throughput.
  * For testing, you can create a socket with netcat via {@code nc localhost 9117 -N}
  */
-public class SocketBenchmark implements ProgramFinisher {
+public class SocketBenchmark implements SocketBenchmarkCallback {
 
     private static final Logger LOG = LogManager.getLogger(SocketBenchmark.class);
 
@@ -51,6 +51,8 @@ public class SocketBenchmark implements ProgramFinisher {
     @Parameter(names = {"-t", "--throughput"}, description = "Logs throughput for ForwardingThread")
     private boolean throughput = true;
 
+    private boolean clientWillReconnect = false;
+
     public static void main(String[] args) throws Exception {
         SocketBenchmark socketBenchmark = new SocketBenchmark();
         socketBenchmark.registerShutdownHook();
@@ -81,8 +83,6 @@ public class SocketBenchmark implements ProgramFinisher {
                 .setLogMessages(logMessages)
                 .setLogMessagesModulo(logMessagesModulo);
 
-        creatorThread = new CreatorThread<String>(this, queue, recordCreator, creatorProperties);
-
         ForwardingThread.ForwardingThreadProperties forwardingProperties = new ForwardingThread.ForwardingThreadProperties();
         forwardingProperties
                 .setPort(port)
@@ -90,17 +90,22 @@ public class SocketBenchmark implements ProgramFinisher {
                 .setLogMessages(logMessages)
                 .setLogMessagesModulo(logMessagesModulo);
 
-        forwardingThread = new ForwardingThread<>(this, queue, forwardingProperties);
+        do {
+            clientWillReconnect = false;
+            interrupted = false;
 
-        creatorThread.start();
-        forwardingThread.start();
+            creatorThread = new CreatorThread<String>(this, queue, recordCreator, creatorProperties);
+            forwardingThread = new ForwardingThread<>(this, queue, creatorThread, forwardingProperties);
 
-        try {
-            creatorThread.join();
-            forwardingThread.join();
-        } catch (InterruptedException e) {
-            LOG.error("SocketBenchmark has been interrupted: {}", e.getLocalizedMessage());
-        }
+            forwardingThread.start();
+
+            try {
+                forwardingThread.join();
+                creatorThread.join();
+            } catch (InterruptedException e) {
+                LOG.error("SocketBenchmark has been interrupted: {}", e.getLocalizedMessage());
+            }
+        } while (clientWillReconnect);
     }
 
     private RecordCreator chooseRecordCreator(String name) {
@@ -115,7 +120,7 @@ public class SocketBenchmark implements ProgramFinisher {
     }
 
     @Override
-    public void finish(String reason) {
+    public void finishApplication(String reason) {
         if (!interrupted) {
             LOG.info("SocketBenchmark interrupted due to '{}'", reason);
             creatorThread.stopProducing();
@@ -124,7 +129,12 @@ public class SocketBenchmark implements ProgramFinisher {
         }
     }
 
+    @Override
+    public void waitingForReconnect() {
+        clientWillReconnect = true;
+    }
+
     private void registerShutdownHook() {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> finish("User aborted program execution")));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> finishApplication("User aborted program execution")));
     }
 }

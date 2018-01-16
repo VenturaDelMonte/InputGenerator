@@ -15,10 +15,12 @@ public class CreatorThread<T> extends Thread {
     private final Queue<T> queue;
     private final RecordCreator<T> recordCreator;
     private final CreateThreadProperties properties;
-    private final ProgramFinisher finisher;
+    private final SocketBenchmarkCallback finisher;
+    private long startingNumber = 0;
     private volatile boolean interrupted = false;
+    private boolean restarting = false;
 
-    CreatorThread(ProgramFinisher finisher,
+    CreatorThread(SocketBenchmarkCallback finisher,
                   Queue<T> queue,
                   RecordCreator<T> recordCreator,
                   CreateThreadProperties properties) {
@@ -29,9 +31,14 @@ public class CreatorThread<T> extends Thread {
         this.properties = properties;
     }
 
+    public synchronized void start(long startingNumber) {
+        this.startingNumber = startingNumber;
+        super.start();
+    }
+
     @Override
     public void run() {
-        for (long counter = 0; counter != properties.maxNumbers && !interrupted; counter++) {
+        for (long counter = startingNumber; counter != properties.maxNumbers && !interrupted; counter++) {
             T record = recordCreator.createRecord(counter);
             queue.add(record);
 
@@ -46,11 +53,14 @@ public class CreatorThread<T> extends Thread {
             }
         }
 
-        finisher.finish("Creator send all records");
+        if (!restarting) {
+            finisher.finishApplication("Creator send all records");
+        }
     }
 
     void stopProducing() {
         interrupt();
+        this.restarting = false;
         interrupted = true;
     }
 

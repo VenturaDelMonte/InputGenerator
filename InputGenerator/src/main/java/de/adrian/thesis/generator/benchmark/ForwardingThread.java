@@ -8,10 +8,10 @@ import org.apache.logging.log4j.MarkerManager;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Scanner;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -26,23 +26,31 @@ public class ForwardingThread<T> extends Thread {
     private static final int TIMEOUT = 120_000;
 
     private final BlockingQueue<T> queue;
-    private final ProgramFinisher finisher;
+    private final SocketBenchmarkCallback applicationCallback;
     private final ForwardingThreadProperties properties;
+    private final CreatorThread<T> producerThread;
     private volatile boolean interrupted = false;
     private long totalRecords, currentRecords;
     private long lastTimestamp = System.currentTimeMillis();
     private ServerSocket socket;
 
-    ForwardingThread(ProgramFinisher finisher, BlockingQueue<T> queue, ForwardingThreadProperties properties) {
+    ForwardingThread(SocketBenchmarkCallback applicationCallback, BlockingQueue<T> queue, CreatorThread<T> producerThread, ForwardingThreadProperties properties) {
         super(THREAD_NAME);
-        this.finisher = finisher;
+        this.applicationCallback = applicationCallback;
         this.queue = queue;
+        this.producerThread = producerThread;
         this.properties = properties;
     }
 
     @Override
     public void run() {
 
+        listenForClientConnection();
+
+        applicationCallback.finishApplication("ForwardingThread finished");
+    }
+
+    private void listenForClientConnection() {
         try (ServerSocket socket = new ServerSocket(properties.port)) {
             socket.setSoTimeout(TIMEOUT);
             this.socket = socket;
@@ -51,7 +59,11 @@ public class ForwardingThread<T> extends Thread {
 
             try (Socket client = socket.accept()) {
 
-                try (PrintWriter outputStream = new PrintWriter(client.getOutputStream())) {
+                try (PrintWriter outputStream = new PrintWriter(client.getOutputStream());
+                     Scanner input = new Scanner(client.getInputStream(), "UTF-8").useDelimiter("\n")) {
+
+                    String command = input.next().toLowerCase();
+                    handleCommand(command);
 
                     while (!interrupted && !outputStream.checkError()) {
 
@@ -86,8 +98,36 @@ public class ForwardingThread<T> extends Thread {
         } catch (InterruptedException e) {
             LOG.error("InterruptedException in ForwardingThread: {}", e);
         }
+    }
 
-        finisher.finish("ForwardingThread finished");
+    private void handleCommand(String command) {
+
+        boolean clientWillReconnect = false;
+
+        if (command.startsWith("start")) {
+
+            String[] split = command.split(":");
+
+            if (split.length >= 2) {
+                clientWillReconnect = split[1].toLowerCase().contains("reconnect");
+            }
+
+            producerThread.start(0);
+        } else if (command.startsWith("from:")) {
+            String[] split = command.split(":");
+            long startingNumber = Long.parseLong(split[1]);
+            producerThread.start(startingNumber);
+
+            if (split.length >= 3) {
+                clientWillReconnect = split[2].toLowerCase().contains("reconnect");
+            }
+        } else {
+            throw new IllegalArgumentException("Received illegal command from client: " + command);
+        }
+
+        if (clientWillReconnect) {
+            applicationCallback.waitingForReconnect();
+        }
     }
 
     void stopConsuming() {
