@@ -59,6 +59,8 @@ public class ForwardingThread<T> extends Thread {
 
             try (Socket client = socket.accept()) {
 
+                LOG.info("Client connected from {}:{}", client.getInetAddress(), client.getPort());
+
                 try (PrintWriter outputStream = new PrintWriter(client.getOutputStream());
                      Scanner input = new Scanner(client.getInputStream(), "UTF-8").useDelimiter("\n")) {
 
