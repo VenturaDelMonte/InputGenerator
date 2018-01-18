@@ -53,6 +53,9 @@ public class SocketBenchmark implements SocketBenchmarkCallback {
     @Parameter(names = {"-t", "--throughput"}, description = "Logs throughput for ForwardingThread")
     private boolean throughput = true;
 
+    @Parameter(names = {"-n", "--name"}, description = "Assigns name to this producing instance. Useful for logging throughput.")
+    private String name;
+
     private boolean clientWillReconnect = false;
 
     public static void main(String[] args) throws Exception {
@@ -90,7 +93,8 @@ public class SocketBenchmark implements SocketBenchmarkCallback {
                 .setPort(port)
                 .setLogThroughput(throughput)
                 .setLogMessages(logMessages)
-                .setLogMessagesModulo(logMessagesModulo);
+                .setLogMessagesModulo(logMessagesModulo)
+                .setName(name);
 
         do {
             clientWillReconnect = false;

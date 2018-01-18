@@ -83,7 +83,8 @@ public class ForwardingThread<T> extends Thread {
                         long currentTime = System.currentTimeMillis();
 
                         if (lastTimestamp + 1_000 < currentTime) {
-                            LOG.info(THROUGHPUT_MARKER, "Processed {} records at {}", currentRecords, currentTime);
+                            LOG.info(THROUGHPUT_MARKER, "{},{},{}",
+                                    properties.name, currentRecords, currentTime);
                             currentRecords = 0;
                             lastTimestamp = currentTime;
                         }
@@ -149,6 +150,7 @@ public class ForwardingThread<T> extends Thread {
         private boolean logMessages = true;
         private int logMessagesModulo = 50;
         private boolean logThroughput;
+        private String name;
 
         public ForwardingThreadProperties setPort(int port) {
             this.port = port;
@@ -168,6 +170,10 @@ public class ForwardingThread<T> extends Thread {
         public ForwardingThreadProperties setLogThroughput(boolean logThroughput) {
             this.logThroughput = logThroughput;
             return this;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
     }
 }
