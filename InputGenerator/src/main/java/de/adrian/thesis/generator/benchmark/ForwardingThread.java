@@ -14,12 +14,11 @@ import java.net.Socket;
 import java.util.Scanner;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class ForwardingThread<T> extends Thread {
 
     private static final Logger LOG = LogManager.getLogger(ForwardingThread.class);
-
-    private static final Marker THROUGHPUT_MARKER = MarkerManager.getMarker("Throughput");
 
     private static final String THREAD_NAME = "ForwardingThread";
 
@@ -29,9 +28,11 @@ public class ForwardingThread<T> extends Thread {
     private final SocketBenchmarkCallback applicationCallback;
     private final ForwardingThreadProperties properties;
     private final CreatorThread<T> producerThread;
+    private final AtomicLong currentRecords = new AtomicLong();
+    private final ThroughputLoggingThread loggingThread;
+
     private volatile boolean interrupted = false;
-    private long totalRecords, currentRecords;
-    private long lastTimestamp = System.currentTimeMillis();
+    private long totalRecords;
     private ServerSocket socket;
 
     ForwardingThread(SocketBenchmarkCallback applicationCallback, BlockingQueue<T> queue, CreatorThread<T> producerThread, ForwardingThreadProperties properties) {
@@ -40,11 +41,13 @@ public class ForwardingThread<T> extends Thread {
         this.queue = queue;
         this.producerThread = producerThread;
         this.properties = properties;
+        this.loggingThread = new ThroughputLoggingThread(currentRecords, properties.name);
     }
 
     @Override
     public void run() {
 
+        loggingThread.start();
         listenForClientConnection();
 
         applicationCallback.finishApplication("ForwardingThread finished");
@@ -78,16 +81,7 @@ public class ForwardingThread<T> extends Thread {
                             LOG.info("ForwardingThread consumed '{}'", record);
                         }
 
-                        // TODO Or use System.nanoTime()? Measure computational overhead
-                        currentRecords++;
-                        long currentTime = System.currentTimeMillis();
-
-                        if (lastTimestamp + 1_000 < currentTime) {
-                            LOG.info(THROUGHPUT_MARKER, "{},{},{}",
-                                    properties.name, currentRecords, currentTime);
-                            currentRecords = 0;
-                            lastTimestamp = currentTime;
-                        }
+                        currentRecords.incrementAndGet();
                     }
                 }
             }
@@ -141,7 +135,14 @@ public class ForwardingThread<T> extends Thread {
                 socket.close();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("Exception closing socket in ForwardingThread", e);
+        }
+
+        loggingThread.interrupt();
+        try {
+            loggingThread.join();
+        } catch (InterruptedException e) {
+            LOG.error("Exception interrupting loggingThread in ForwardingThread", e);
         }
     }
 
