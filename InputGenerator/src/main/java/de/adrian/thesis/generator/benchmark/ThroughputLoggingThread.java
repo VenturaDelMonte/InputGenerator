@@ -14,7 +14,6 @@ public class ThroughputLoggingThread extends Thread {
     private static final Marker THROUGHPUT_MARKER = MarkerManager.getMarker("Throughput");
     private final String instanceName;
 
-    private long lastTimestamp = System.currentTimeMillis();
     private final AtomicLong throughputCount;
 
     ThroughputLoggingThread(AtomicLong throughputCount, String instanceName) {
@@ -25,20 +24,18 @@ public class ThroughputLoggingThread extends Thread {
     @Override
     public void run() {
 
-        while (!interrupted()) {
+        while (true) {
             try {
                 Thread.sleep(1000);
 
                 // TODO Or use System.nanoTime()? Measure computational overhead
                 long currentTime = System.currentTimeMillis();
 
-//                if (lastTimestamp + 1_000 < currentTime) {
                 LOG.info(THROUGHPUT_MARKER, "{},{},{}", instanceName, throughputCount, currentTime);
                 throughputCount.set(0);
-                lastTimestamp = currentTime;
-//                }
             } catch (InterruptedException e) {
                 LOG.error("Exception in ThroughputLoggingThread", e);
+                return;
             }
         }
     }
