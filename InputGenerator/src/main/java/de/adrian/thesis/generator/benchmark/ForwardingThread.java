@@ -150,8 +150,8 @@ public class ForwardingThread<T> extends Thread {
         private int port;
         private boolean logMessages = true;
         private int logMessagesModulo = 50;
-        private boolean logThroughput;
-        private String name;
+        private boolean logThroughput = true;
+        private String name = "DefaultInstance";
 
         public ForwardingThreadProperties setPort(int port) {
             this.port = port;
