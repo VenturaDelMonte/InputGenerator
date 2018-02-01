@@ -54,7 +54,7 @@ public class SocketBenchmark implements SocketBenchmarkCallback {
     private boolean throughput = true;
 
     @Parameter(names = {"-n", "--name"}, description = "Assigns name to this producing instance. Useful for logging throughput.")
-    private String name;
+    private String name = "DefaultInstance";
 
     private boolean clientWillReconnect = false;
 
