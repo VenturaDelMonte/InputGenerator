@@ -7,7 +7,11 @@ import de.adrian.thesis.generator.benchmark.recordcreator.CountingTimestampRecor
 import de.adrian.thesis.generator.benchmark.recordcreator.RecordCreator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -74,6 +78,8 @@ public class SocketBenchmark implements SocketBenchmarkCallback {
     }
 
     private void startGenerator() {
+
+        reconfigureLoggerForDynamicFilename();
 
         LOG.info("Starting SocketBenchmark on port {} with maxNumberOfMessages {}", port, maxNumberOfMessages);
 
@@ -142,5 +148,23 @@ public class SocketBenchmark implements SocketBenchmarkCallback {
 
     private void registerShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> finishApplication("User aborted program execution")));
+    }
+
+    private void reconfigureLoggerForDynamicFilename() {
+
+        System.setProperty("instanceName", name);
+
+        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        ctx.reconfigure();
+
+        try {
+            File obsoleteThroughputLogFile = new File("logs/${sys:instanceName}-throughput.log");
+            Files.delete(obsoleteThroughputLogFile.toPath());
+
+            File obsoleteStdoutLogFile = new File("logs/${sys:instanceName}-stdout.log");
+            Files.delete(obsoleteStdoutLogFile.toPath());
+        } catch (IOException exception) {
+            LOG.error("Failed to delete dummy logging files", exception);
+        }
     }
 }

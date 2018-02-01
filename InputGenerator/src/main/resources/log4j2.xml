@@ -2,14 +2,14 @@
 <Configuration status="WARN" name="MyApp">
     <Appenders>
         <RollingFile name="StdOutFileLogger"
-                     fileName="logs/stdout.log"
+                     fileName="logs/${sys:instanceName}-stdout.log"
                      filePattern="logs/stdout-%d{HH-mm-ss-MM-dd-yyyy}.log">
             <MarkerFilter marker="Throughput" onMatch="DENY" onMismatch="ACCEPT"/>
             <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level [%t] %logger{36} - %msg%n"/>
             <OnStartupTriggeringPolicy/>
         </RollingFile>
         <RollingFile name="ThroughputFileLogger"
-                     fileName="logs/throughput.log"
+                     fileName="logs/${sys:instanceName}-throughput.log"
                      filePattern="logs/throughput-%d{HH-mm-ss-MM-dd-yyyy}.log">
             <MarkerFilter marker="Throughput" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="%d{HH:mm:ss.SSS} - %msg%n"/>
