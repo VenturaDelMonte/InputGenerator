@@ -18,7 +18,6 @@ public class CreatorThread<T> extends Thread {
     private final SocketBenchmarkCallback finisher;
     private long startingNumber = 0;
     private volatile boolean interrupted = false;
-    private boolean restarting = false;
 
     CreatorThread(SocketBenchmarkCallback finisher,
                   Queue<T> queue,
@@ -38,7 +37,12 @@ public class CreatorThread<T> extends Thread {
 
     @Override
     public void run() {
-        for (long counter = startingNumber; counter != properties.maxNumbers && !interrupted; counter++) {
+
+        if (startingNumber >= properties.maxNumbers) {
+            finisher.finishApplication("Starting number already bigger that maxNumber");
+        }
+
+        for (long counter = startingNumber; counter < properties.maxNumbers && !interrupted; counter++) {
             T record = recordCreator.createRecord(counter);
             queue.add(record);
 
@@ -50,17 +54,13 @@ public class CreatorThread<T> extends Thread {
                 Thread.sleep(properties.delay);
             } catch (InterruptedException e) {
                 LOG.error("CreatorThread was interrupted: {}", e.getLocalizedMessage());
+                break;
             }
-        }
-
-        if (!restarting) {
-            finisher.finishApplication("Creator send all records");
         }
     }
 
     void stopProducing() {
         interrupt();
-        this.restarting = false;
         interrupted = true;
     }
 

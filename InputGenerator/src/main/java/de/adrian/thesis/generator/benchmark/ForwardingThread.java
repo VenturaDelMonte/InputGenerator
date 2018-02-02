@@ -20,7 +20,8 @@ public class ForwardingThread<T> extends Thread {
 
     private static final String THREAD_NAME = "ForwardingThread";
 
-    private static final int TIMEOUT = 120_000;
+    private static final int SOCKET_TIMEOUT = 120_000;
+    private static final int WAITING_TIMEOUT = 100;
 
     private final BlockingQueue<T> queue;
     private final SocketBenchmarkCallback applicationCallback;
@@ -53,7 +54,7 @@ public class ForwardingThread<T> extends Thread {
 
     private void listenForClientConnection() {
         try (ServerSocket socket = new ServerSocket(properties.port)) {
-            socket.setSoTimeout(TIMEOUT);
+            socket.setSoTimeout(SOCKET_TIMEOUT);
             this.socket = socket;
 
             LOG.info("Waiting for connections on port {}...", properties.port);
@@ -70,7 +71,11 @@ public class ForwardingThread<T> extends Thread {
 
                     while (!interrupted && !outputStream.checkError()) {
 
-                        T record = queue.poll(TIMEOUT, TimeUnit.SECONDS);
+                        T record = queue.poll(WAITING_TIMEOUT, TimeUnit.MILLISECONDS);
+
+                        if (record == null) {
+                            break;
+                        }
 
                         outputStream.write(record + "\n");
                         outputStream.flush();
@@ -92,6 +97,8 @@ public class ForwardingThread<T> extends Thread {
             LOG.error("Error sending element from queue over socket: {}", e);
         } catch (InterruptedException e) {
             LOG.error("InterruptedException in ForwardingThread: {}", e);
+        } catch (Exception exception) {
+            LOG.error("GeneralException in ForwardingThread: {}", exception);
         }
     }
 
@@ -113,7 +120,7 @@ public class ForwardingThread<T> extends Thread {
             long startingNumber = Long.parseLong(split[1]);
             producerThread.start(startingNumber);
 
-            if (split.length >= 3) {
+            if (split.length == 3) {
                 clientWillReconnect = split[2].toLowerCase().contains("reconnect");
             }
         } else {

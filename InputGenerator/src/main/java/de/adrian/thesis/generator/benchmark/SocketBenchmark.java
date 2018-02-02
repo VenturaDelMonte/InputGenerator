@@ -164,7 +164,7 @@ public class SocketBenchmark implements SocketBenchmarkCallback {
             File obsoleteStdoutLogFile = new File("logs/${sys:instanceName}-stdout.log");
             Files.delete(obsoleteStdoutLogFile.toPath());
         } catch (IOException exception) {
-            LOG.error("Failed to delete dummy logging files", exception);
+            LOG.error("Dummy log files have already been deleted.");
         }
     }
 }
