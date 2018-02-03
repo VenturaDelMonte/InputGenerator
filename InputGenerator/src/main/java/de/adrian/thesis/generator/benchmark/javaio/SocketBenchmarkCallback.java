@@ -1,4 +1,4 @@
-package de.adrian.thesis.generator.benchmark;
+package de.adrian.thesis.generator.benchmark.javaio;
 
 
 public interface SocketBenchmarkCallback {

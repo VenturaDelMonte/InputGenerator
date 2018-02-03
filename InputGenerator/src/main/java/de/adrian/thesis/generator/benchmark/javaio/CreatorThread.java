@@ -1,4 +1,4 @@
-package de.adrian.thesis.generator.benchmark;
+package de.adrian.thesis.generator.benchmark.javaio;
 
 import de.adrian.thesis.generator.benchmark.recordcreator.RecordCreator;
 import org.apache.logging.log4j.LogManager;
