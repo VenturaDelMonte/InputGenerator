@@ -20,7 +20,6 @@ public class ForwardingThread<T> extends Thread {
 
     private static final String THREAD_NAME = "ForwardingThread";
 
-    private static final int SOCKET_TIMEOUT = 120_000;
     private static final int WAITING_TIMEOUT = 100;
 
     private final BlockingQueue<T> queue;
@@ -54,7 +53,7 @@ public class ForwardingThread<T> extends Thread {
 
     private void listenForClientConnection() {
         try (ServerSocket socket = new ServerSocket(properties.port)) {
-            socket.setSoTimeout(SOCKET_TIMEOUT);
+            socket.setSoTimeout(properties.serverTimeout);
             this.socket = socket;
 
             LOG.info("Waiting for connections on port {}...", properties.port);
@@ -151,12 +150,13 @@ public class ForwardingThread<T> extends Thread {
         }
     }
 
-    static class ForwardingThreadProperties {
-        private int port;
-        private boolean logMessages = true;
-        private int logMessagesModulo = 50;
-        private boolean logThroughput = true;
-        private String name = "DefaultInstance";
+    public static class ForwardingThreadProperties {
+        public int port;
+        public boolean logMessages = true;
+        public int logMessagesModulo = 50;
+        public boolean logThroughput = true;
+        public String name = "DefaultInstance";
+        public int serverTimeout;
 
         public ForwardingThreadProperties setPort(int port) {
             this.port = port;
@@ -178,8 +178,14 @@ public class ForwardingThread<T> extends Thread {
             return this;
         }
 
-        public void setName(String name) {
+        public ForwardingThreadProperties setName(String name) {
             this.name = name;
+            return this;
+        }
+
+        public ForwardingThreadProperties setServerTimeout(int serverPort) {
+            this.serverTimeout = serverPort;
+            return this;
         }
     }
 }

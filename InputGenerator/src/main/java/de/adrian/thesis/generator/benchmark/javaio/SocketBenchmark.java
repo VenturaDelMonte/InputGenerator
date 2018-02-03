@@ -42,21 +42,9 @@ public class SocketBenchmark extends Benchmark implements SocketBenchmarkCallbac
         LOG.info("Starting SocketBenchmark on port {} with maxNumberOfMessages {}", port, maxNumberOfMessages);
 
         BlockingQueue<String> queue = new LinkedBlockingDeque<>();
-        
-        CreatorThread.CreateThreadProperties creatorProperties = new CreatorThread.CreateThreadProperties();
-        creatorProperties
-                .setDelay(msDelay)
-                .setMaxNumbers(maxNumberOfMessages)
-                .setLogMessages(logMessages)
-                .setLogMessagesModulo(logMessagesModulo);
 
-        ForwardingThread.ForwardingThreadProperties forwardingProperties = new ForwardingThread.ForwardingThreadProperties();
-        forwardingProperties
-                .setPort(port)
-                .setLogThroughput(throughput)
-                .setLogMessages(logMessages)
-                .setLogMessagesModulo(logMessagesModulo)
-                .setName(name);
+        CreatorThread.CreateThreadProperties creatorProperties = getCreatorProperties();
+        ForwardingThread.ForwardingThreadProperties forwardingProperties = getForwardingProperties();
 
         do {
             clientWillReconnect = false;

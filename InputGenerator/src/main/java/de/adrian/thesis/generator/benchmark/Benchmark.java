@@ -2,6 +2,8 @@ package de.adrian.thesis.generator.benchmark;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+import de.adrian.thesis.generator.benchmark.javaio.CreatorThread;
+import de.adrian.thesis.generator.benchmark.javaio.ForwardingThread;
 import de.adrian.thesis.generator.benchmark.recordcreator.CountingRecordCreator;
 import de.adrian.thesis.generator.benchmark.recordcreator.CountingTimestampRecordCreator;
 import de.adrian.thesis.generator.benchmark.recordcreator.RecordCreator;
@@ -33,22 +35,25 @@ public abstract class Benchmark<T> {
     private String recordCreatorName = "timestamp";
 
     @Parameter(names = {"-d", "--delay"}, description = "Delay between between insertions of new elements to queue")
-    protected int msDelay = 50;
+    private int msDelay = 50;
 
     @Parameter(names = {"-m", "--maxMessages"}, description = "Max number of messages, that should be sent")
     protected int maxNumberOfMessages = 500;
 
     @Parameter(names = {"-l", "--logMessages"}, description = "Displays log messages for the creation and sending progress")
-    protected boolean logMessages = true;
+    private boolean logMessages = true;
 
     @Parameter(names = {"-mo", "--logModulo"}, description = "Only display log messages for only ever n-th record")
-    protected int logMessagesModulo = 50;
+    private int logMessagesModulo = 50;
 
     @Parameter(names = {"-t", "--throughput"}, description = "Logs throughput for ForwardingThread")
-    protected boolean throughput = true;
+    private boolean throughput = true;
 
     @Parameter(names = {"-n", "--name"}, description = "Assigns name to this producing instance. Useful for logging throughput.")
-    protected String name = "DefaultInstance";
+    private String name = "DefaultInstance";
+
+    @Parameter(names = {"-st", "--serverTimeout"}, description = "Timeout after which the netty server will shutdown, if no new client has connected and no client is active")
+    private int serverTimeout = 120;
 
     protected RecordCreator<T> recordCreator;
 
@@ -80,6 +85,28 @@ public abstract class Benchmark<T> {
         } else {
             return recordCreator;
         }
+    }
+
+    protected CreatorThread.CreateThreadProperties getCreatorProperties() {
+        CreatorThread.CreateThreadProperties creatorProperties = new CreatorThread.CreateThreadProperties();
+
+        return creatorProperties
+                .setDelay(msDelay)
+                .setMaxNumbers(maxNumberOfMessages)
+                .setLogMessages(logMessages)
+                .setLogMessagesModulo(logMessagesModulo);
+    }
+
+    protected ForwardingThread.ForwardingThreadProperties getForwardingProperties() {
+        ForwardingThread.ForwardingThreadProperties forwardingProperties = new ForwardingThread.ForwardingThreadProperties();
+
+        return forwardingProperties
+                .setPort(port)
+                .setLogThroughput(throughput)
+                .setLogMessages(logMessages)
+                .setLogMessagesModulo(logMessagesModulo)
+                .setName(name)
+                .setServerTimeout(serverTimeout);
     }
 
     private void reconfigureLoggerForDynamicFilename() {

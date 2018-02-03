@@ -64,28 +64,28 @@ public class CreatorThread<T> extends Thread {
         interrupted = true;
     }
 
-    static class CreateThreadProperties {
-        private int delay = 50;
-        private long maxNumbers = -1;
-        private boolean logMessages = true;
-        private int logMessagesModulo = 50;
+    public static class CreateThreadProperties {
+        public int delay = 50;
+        public long maxNumbers = -1;
+        public boolean logMessages = true;
+        public int logMessagesModulo = 50;
 
-        CreateThreadProperties setDelay(int delay) {
+        public CreateThreadProperties setDelay(int delay) {
             this.delay = delay;
             return this;
         }
 
-        CreateThreadProperties setMaxNumbers(long maxNumbers) {
+        public CreateThreadProperties setMaxNumbers(long maxNumbers) {
             this.maxNumbers = maxNumbers;
             return this;
         }
 
-        CreateThreadProperties setLogMessages(boolean logMessages) {
+        public CreateThreadProperties setLogMessages(boolean logMessages) {
             this.logMessages = logMessages;
             return this;
         }
 
-        CreateThreadProperties setLogMessagesModulo(int logMessagesModulo) {
+        public CreateThreadProperties setLogMessagesModulo(int logMessagesModulo) {
             this.logMessagesModulo = logMessagesModulo;
             return this;
         }
