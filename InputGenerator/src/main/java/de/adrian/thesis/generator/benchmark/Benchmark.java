@@ -58,19 +58,20 @@ public abstract class Benchmark<T> {
     protected RecordCreator<T> recordCreator;
 
     public Benchmark(String[] args) {
-        Benchmark benchmark = getInstance();
-        benchmark.parseCLI(args);
-        benchmark.reconfigureLoggerForDynamicFilename();
-        recordCreator = benchmark.chooseRecordCreator(recordCreatorName);
+        parseCLI(args);
+        reconfigureLoggerForDynamicFilename();
+        recordCreator = chooseRecordCreator(recordCreatorName);
     }
-
-    public abstract Benchmark getInstance();
 
     public abstract void startGenerator();
 
-    private void parseCLI(String[] args) {
+    /**
+     * Do again, if subclass declares additional arguments
+     * @param args The command line arguments
+     */
+    public void parseCLI(String[] args) {
         JCommander.newBuilder()
-                .addObject(getInstance())
+                .addObject(this)
                 .acceptUnknownOptions(true)
                 .build()
                 .parse(args);

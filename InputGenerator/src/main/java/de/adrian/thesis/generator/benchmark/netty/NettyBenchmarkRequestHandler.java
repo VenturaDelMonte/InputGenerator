@@ -31,9 +31,11 @@ public class NettyBenchmarkRequestHandler extends SimpleChannelInboundHandler<St
     private static final Logger LOG = LogManager.getLogger(NettyBenchmarkRequestHandler.class);
 
     private final NettyForwardingThread forwardingThread;
+    private final NettyPersonForwardingThread personForwardingThread;
 
-    NettyBenchmarkRequestHandler(NettyForwardingThread forwardingThread) {
+    NettyBenchmarkRequestHandler(NettyForwardingThread forwardingThread, NettyPersonForwardingThread personForwardingThread) {
         this.forwardingThread = forwardingThread;
+        this.personForwardingThread = personForwardingThread;
     }
 
     @Override
@@ -42,6 +44,12 @@ public class NettyBenchmarkRequestHandler extends SimpleChannelInboundHandler<St
         NettyBenchmark.CHANNELS.add(ctx.channel());
     }
 
+    /**
+     * TODO Check for correct state when receiving contradicting requests
+     * @param ctx ChannelHandler Context
+     * @param request String request from the client
+     * @throws Exception thrown in case of errors
+     */
     @Override
     public void channelRead0(ChannelHandlerContext ctx, String request) throws Exception {
 
@@ -55,11 +63,14 @@ public class NettyBenchmarkRequestHandler extends SimpleChannelInboundHandler<St
             forwardingThread.startConsuming(startingNumber);
         } else if (request.startsWith("stop")) {
             forwardingThread.stopConsuming();
+            personForwardingThread.stopConsuming();
             ctx.close();
 
 //            Would close the whole application
 //            ctx.channel().close();
 //            ctx.channel().parent().close();
+        } else if (request.startsWith("persons")) {
+            personForwardingThread.startConsuming();
         } else {
             LOG.error("Received illegal command '{}'", request);
             ctx.close();

@@ -16,8 +16,8 @@ package de.adrian.thesis.generator.benchmark.netty;
  * under the License.
  */
 
+import com.beust.jcommander.Parameter;
 import de.adrian.thesis.generator.benchmark.Benchmark;
-import de.adrian.thesis.generator.benchmark.javaio.CreatorThread;
 import de.adrian.thesis.generator.benchmark.javaio.ForwardingThread;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.EventLoopGroup;
@@ -38,24 +38,26 @@ public final class NettyBenchmark extends Benchmark {
 
     static final ChannelGroup CHANNELS = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
+    @Parameter(names = {"-iP", "--initialPersons"}, description = "Set initial people to create")
+    private int initialPersons = 50;
+
     private NettyBenchmark(String[] args) {
         super(args);
     }
 
     public static void main(String[] args) {
         NettyBenchmark nettyBenchmark = new NettyBenchmark(args);
+        nettyBenchmark.parseCLI(args);
         nettyBenchmark.startGenerator();
-    }
-
-    @Override
-    public NettyBenchmark getInstance() {
-        return this;
     }
 
     @Override
     public void startGenerator() {
 
-        CreatorThread.CreateThreadProperties creatorProperties = getCreatorProperties();
+        NettyPersonCreatorThread.NettyPersonCreatorThreadProperties creatorProperties =
+                new NettyPersonCreatorThread.NettyPersonCreatorThreadProperties(getCreatorProperties());
+        creatorProperties.setInitialPersons(initialPersons);
+
         ForwardingThread.ForwardingThreadProperties forwardingProperties = getForwardingProperties();
 
         EventLoopGroup bossGroup = new EpollEventLoopGroup(1);

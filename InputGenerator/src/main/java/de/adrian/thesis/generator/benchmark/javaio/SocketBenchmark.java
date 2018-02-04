@@ -32,11 +32,6 @@ public class SocketBenchmark extends Benchmark implements SocketBenchmarkCallbac
     }
 
     @Override
-    public Benchmark getInstance() {
-        return this;
-    }
-
-    @Override
     public void startGenerator() {
 
         LOG.info("Starting SocketBenchmark on port {} with maxNumberOfMessages {}", port, maxNumberOfMessages);

@@ -44,12 +44,12 @@ public class NettyBenchmarkRequestInitializer<T> extends ChannelInitializer<Sock
     private static final int MAX_FRAME_LENGTH = 8092;
 
     private final RecordCreator<T> recordCreator;
-    private final CreatorThread.CreateThreadProperties creatorProperties;
+    private final NettyPersonCreatorThread.NettyPersonCreatorThreadProperties creatorProperties;
     private final ForwardingThread.ForwardingThreadProperties forwardingProperties;
 
     private int instanceNumber = 0;
 
-    NettyBenchmarkRequestInitializer(RecordCreator<T> recordCreator, CreatorThread.CreateThreadProperties creatorProperties,
+    NettyBenchmarkRequestInitializer(RecordCreator<T> recordCreator, NettyPersonCreatorThread.NettyPersonCreatorThreadProperties creatorProperties,
                                      ForwardingThread.ForwardingThreadProperties forwardingProperties) {
         this.recordCreator = recordCreator;
         this.creatorProperties = creatorProperties;
@@ -74,14 +74,19 @@ public class NettyBenchmarkRequestInitializer<T> extends ChannelInitializer<Sock
         pipeline.addLast(DECODER);
         pipeline.addLast(ENCODER);
 
+        String instanceName = forwardingProperties.name + instanceNumber++;
+
         NettyForwardingThread<String> forwardingThread =
                 new NettyForwardingThread(channel,
                         recordCreator,
                         creatorProperties,
                         forwardingProperties,
-                        forwardingProperties.name + instanceNumber++);
+                        instanceName);
 
-        pipeline.addLast(new NettyBenchmarkRequestHandler(forwardingThread));
+        NettyPersonForwardingThread personForwardingThread =
+                new NettyPersonForwardingThread(channel, creatorProperties, forwardingProperties, instanceName);
+
+        pipeline.addLast(new NettyBenchmarkRequestHandler(forwardingThread, personForwardingThread));
     }
 }
 
