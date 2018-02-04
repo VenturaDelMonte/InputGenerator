@@ -35,19 +35,16 @@ import de.adrian.thesis.generator.nexmark.data.AuctionType;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class NexmarkStreamGenerator {
-
-    private static final int NUMBER_OF_INITIAL_AUCTIONS = 50;
 
     private static final boolean LIMIT_ATTRIBUTES = false;
 
     private final String NEWLINE = System.lineSeparator();
 
-    private static final String YES_NO[] = {"yes", "no"};
-
     // will generate bids, items and persons in a ratio of 10 bids/item 5 items/person
-    private final Random random = new Random(123123110); // Maybe replace with ThreadLocalRandom
+    private final ThreadLocalRandom random = ThreadLocalRandom.current(); // Maybe replace with ThreadLocalRandom
     private final SimpleCalendar calendar = new SimpleCalendar(random);
     private final Persons persons = new Persons(); // for managing person ids
     private final Bids bids = new Bids();
@@ -59,7 +56,8 @@ public class NexmarkStreamGenerator {
 
     private static NexmarkStreamGenerator INSTANCE;
 
-    private NexmarkStreamGenerator() { }
+    private NexmarkStreamGenerator() {
+    }
 
     public static NexmarkStreamGenerator GetInstance() {
 
@@ -78,11 +76,11 @@ public class NexmarkStreamGenerator {
             System.out.println("WARNING: LIMITING ATTRIBUTES");
         }
 
-        for (int i = 0; i < NUMBER_OF_INITIAL_AUCTIONS; i++) {
-            initMyBuf();
-            generateAuction(buffer);
-            writeMyBuf();
-        }
+//        for (int i = 0; i < NUMBER_OF_INITIAL_AUCTIONS; i++) {
+//            initMyBuf();
+//            generateAuction(buffer);
+//            writeMyBuf();
+//        }
 
         // TODO Introduce additional layer of indirection for varying the persons, auctions and bids per step
         // TODO Maybe, do
@@ -152,64 +150,55 @@ public class NexmarkStreamGenerator {
         }
     }
 
+    public String generateAuction() {
+        return generateAuction(LIMIT_ATTRIBUTES);
+    }
+
     /**
      * Generates auctions. Previous note: A Person may be selling items for a different regions.
      * Does not matter for out use case.
      *
-     * @param buffer The buffer to write to
+     * @param limitAttributes Whether to use the full output
      */
-    private void generateAuction(Buffer buffer) {
+    public String generateAuction(boolean limitAttributes) {
         calendar.incrementTime();
+
+        StringBuilder builder = new StringBuilder(200);
 
         // initial, reserve?, bidder*, current, privacy?, itemref, seller, annotation, quantity, type, interval
 
-        buffer.append("auction_id=");
+        builder.append("auction_id=");
         int auctionId = openAuctions.getNewId();
-        buffer.append(auctionId);
-
-        if (!LIMIT_ATTRIBUTES) {
-
-            // reserve
-//                if (random.nextBoolean()) {
-//                    buffer.append("<reserve>");
-//                    buffer.append((int) Math.round((openAuctions.getCurrPrice(auctionId)) * (1.2 + (random.nextDouble() + 1))));
-//                }
-
-            if (random.nextBoolean()) {
-                buffer.append(",privacy=");
-                buffer.append(YES_NO[random.nextInt(2)]);
-            }
-        }
+        builder.append(auctionId);
 
         // Assume itemId and openAuctionId are same, therefore only one auction per item allowed
-        buffer.append(",item_id=");
-        buffer.append(auctionId);
+        builder.append(",item_id=");
+        builder.append(auctionId);
 
-        buffer.append(",seller_id=");
-        buffer.append(persons.getExistingId());
+        builder.append(",seller_id=");
+        builder.append(persons.getExistingId());
 
         // Original benchmark allows up to 10 categories, we allow an item to be in one category
-        buffer.append(",category=");
+        builder.append(",category=");
         int category_id = random.nextInt(PersonGenerator.NUM_CATEGORIES);
-        buffer.append(category_id);
+        builder.append(category_id);
 
         if (!LIMIT_ATTRIBUTES) {
 
-            buffer.append(",quantity=");
+            builder.append(",quantity=");
             int quantity = 1 + random.nextInt(10);
-            buffer.append(quantity);
+            builder.append(quantity);
 
-            buffer.append(",type=");
-            buffer.append(AuctionType.AUCTION_TYPE[random.nextInt(AuctionType.AUCTION_TYPE.length)]);
+            builder.append(",type=");
+            builder.append(AuctionType.AUCTION_TYPE[random.nextInt(AuctionType.AUCTION_TYPE.length)]);
 
-            buffer.append(",start=");
-            buffer.append(calendar.getTimeInSecs());
-            buffer.append(",end=");
-            buffer.append(openAuctions.getEndTime(auctionId));
-
-//            Previously, but also commented out
-//            myb.append(System.currentTimeMillis() * WARP + DELAY + random.nextInt(MAXINCREMENT_MILLISEC));
+            builder.append(",start=");
+            builder.append(calendar.getTimeInSecs());
+            builder.append(",end=");
+            builder.append(openAuctions.getEndTime(auctionId));
         }
+
+        return builder.toString();
     }
 
     public String generatePerson() {
@@ -218,12 +207,11 @@ public class NexmarkStreamGenerator {
 
     /**
      * Generates persons based on the following schema:
-     *
      */
     public String generatePerson(boolean limitAttributes) {
         calendar.incrementTime();
 
-        StringBuilder generator = new StringBuilder();
+        StringBuilder generator = new StringBuilder(200);
 
         personGenerator.generateValues(openAuctions); // person object is reusable now
 
@@ -275,7 +263,7 @@ public class NexmarkStreamGenerator {
                 generator.append(",interest_category=");
 
                 for (int j = 0; j < personGenerator.profile.interests.size(); j++) {
-                    generator.append((String) personGenerator.profile.interests.get(j));
+                    generator.append(personGenerator.profile.interests.get(j));
                     if (j + 1 != personGenerator.profile.interests.size()) {
                         generator.append(":");
                     }

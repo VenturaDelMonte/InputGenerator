@@ -31,11 +31,15 @@ public class NettyBenchmarkRequestHandler extends SimpleChannelInboundHandler<St
     private static final Logger LOG = LogManager.getLogger(NettyBenchmarkRequestHandler.class);
 
     private final NettyForwardingThread forwardingThread;
-    private final NettyPersonForwardingThread personForwardingThread;
+    private final NettyStringForwardingThread personForwardingThread;
+    private final NettyStringForwardingThread auctionForwardingThread;
 
-    NettyBenchmarkRequestHandler(NettyForwardingThread forwardingThread, NettyPersonForwardingThread personForwardingThread) {
+    NettyBenchmarkRequestHandler(NettyForwardingThread forwardingThread,
+                                 NettyStringForwardingThread personThread,
+                                 NettyStringForwardingThread auctionThread) {
         this.forwardingThread = forwardingThread;
-        this.personForwardingThread = personForwardingThread;
+        this.personForwardingThread = personThread;
+        this.auctionForwardingThread = auctionThread;
     }
 
     @Override
@@ -71,6 +75,8 @@ public class NettyBenchmarkRequestHandler extends SimpleChannelInboundHandler<St
 //            ctx.channel().parent().close();
         } else if (request.startsWith("persons")) {
             personForwardingThread.startConsuming();
+        } else if (request.startsWith("auction")){
+            auctionForwardingThread.startConsuming();
         } else {
             LOG.error("Received illegal command '{}'", request);
             ctx.close();

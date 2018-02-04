@@ -16,9 +16,10 @@ package de.adrian.thesis.generator.benchmark.netty;
  * under the License.
  */
 
-import de.adrian.thesis.generator.benchmark.javaio.CreatorThread;
 import de.adrian.thesis.generator.benchmark.javaio.ForwardingThread;
-import de.adrian.thesis.generator.benchmark.recordcreator.CountingRecordCreator;
+import de.adrian.thesis.generator.benchmark.netty.creators.AbstractNettyCreatorThread;
+import de.adrian.thesis.generator.benchmark.netty.creators.NettyAuctionCreatorThread;
+import de.adrian.thesis.generator.benchmark.netty.creators.NettyPersonCreatorThread;
 import de.adrian.thesis.generator.benchmark.recordcreator.RecordCreator;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -30,6 +31,9 @@ import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Creates a newly configured {@link ChannelPipeline} for a new channel.
@@ -44,12 +48,13 @@ public class NettyBenchmarkRequestInitializer<T> extends ChannelInitializer<Sock
     private static final int MAX_FRAME_LENGTH = 8092;
 
     private final RecordCreator<T> recordCreator;
-    private final NettyPersonCreatorThread.NettyPersonCreatorThreadProperties creatorProperties;
+    private final AbstractNettyCreatorThread.AbstractNettyCreatorThreadProperties creatorProperties;
     private final ForwardingThread.ForwardingThreadProperties forwardingProperties;
 
     private int instanceNumber = 0;
 
-    NettyBenchmarkRequestInitializer(RecordCreator<T> recordCreator, NettyPersonCreatorThread.NettyPersonCreatorThreadProperties creatorProperties,
+    NettyBenchmarkRequestInitializer(RecordCreator<T> recordCreator,
+                                     AbstractNettyCreatorThread.AbstractNettyCreatorThreadProperties creatorProperties,
                                      ForwardingThread.ForwardingThreadProperties forwardingProperties) {
         this.recordCreator = recordCreator;
         this.creatorProperties = creatorProperties;
@@ -83,10 +88,17 @@ public class NettyBenchmarkRequestInitializer<T> extends ChannelInitializer<Sock
                         forwardingProperties,
                         instanceName);
 
-        NettyPersonForwardingThread personForwardingThread =
-                new NettyPersonForwardingThread(channel, creatorProperties, forwardingProperties, instanceName);
+        BlockingQueue<String> persons = new LinkedBlockingQueue<>();
+        NettyPersonCreatorThread personCreatorThread = new NettyPersonCreatorThread(persons, creatorProperties);
+        NettyStringForwardingThread personForwardingThread =
+                new NettyStringForwardingThread(channel, persons, personCreatorThread, forwardingProperties, instanceName);
 
-        pipeline.addLast(new NettyBenchmarkRequestHandler(forwardingThread, personForwardingThread));
+        BlockingQueue<String> auctions = new LinkedBlockingQueue<>();
+        NettyAuctionCreatorThread auctionCreatorThread = new NettyAuctionCreatorThread(auctions, creatorProperties);
+        NettyStringForwardingThread auctionForwardingThread =
+                new NettyStringForwardingThread(channel, auctions, auctionCreatorThread, forwardingProperties, instanceName);
+
+        pipeline.addLast(new NettyBenchmarkRequestHandler(forwardingThread, personForwardingThread, auctionForwardingThread));
     }
 }
 

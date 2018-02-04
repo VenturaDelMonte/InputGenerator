@@ -38,20 +38,26 @@ class Persons {
 
     // persons dont go away so lowChunk is always 0
     private int highChunk = 1;
-    private int currentId = 0;
+    private int currentId = -1;
     private Random random = new Random(283494);
 
     // creates the open auction instance as well as returning the new id
-    public int getNewId() {
-        int newId = currentId;
+    synchronized int getNewId() {
         currentId++;
+        int newId = currentId;
         if (newId == highChunk * PERSON_DISTRIBUTION_SIZE) {
             highChunk++;
         }
         return newId;
     }
 
-    public int getExistingId() {
+    synchronized int getExistingId() {
+
+        if (currentId == -1) {
+            // TODO Ignore for now, that initially, some Auctions are created without actual persons
+//            throw new IllegalStateException("No persons have been created so far");
+        }
+
         int id = random.nextInt(PERSON_DISTRIBUTION_SIZE);
         id += getRandomChunkOffset();
         return id % currentId;

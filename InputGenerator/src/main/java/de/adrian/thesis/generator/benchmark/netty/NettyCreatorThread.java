@@ -9,6 +9,12 @@ import org.apache.logging.log4j.Logger;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
+/**
+ * Creates records using {@link RecordCreator<T>} and inserts them using a queue.
+ * The {@link NettyForwardingThread<T>} will forward the records using a socket.
+ *
+ * @param <T> the record and queue type
+ */
 public class NettyCreatorThread<T> extends Thread {
 
     private static final Logger LOG = LogManager.getLogger(NettyCreatorThread.class);

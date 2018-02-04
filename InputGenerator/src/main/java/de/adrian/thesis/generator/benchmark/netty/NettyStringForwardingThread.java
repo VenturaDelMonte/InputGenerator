@@ -3,26 +3,26 @@ package de.adrian.thesis.generator.benchmark.netty;
 
 import de.adrian.thesis.generator.benchmark.javaio.ForwardingThread;
 import de.adrian.thesis.generator.benchmark.javaio.ThroughputLoggingThread;
+import de.adrian.thesis.generator.benchmark.netty.creators.AbstractNettyCreatorThread;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.socket.SocketChannel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class NettyPersonForwardingThread extends Thread {
+public class NettyStringForwardingThread extends Thread {
 
-    private static final Logger LOG = LogManager.getLogger(NettyPersonForwardingThread.class);
+    private static final Logger LOG = LogManager.getLogger(NettyStringForwardingThread.class);
 
-    private static final String THREAD_NAME = "NettyPersonForwardingThread";
+    private static final String THREAD_NAME = "NettyStringForwardingThread";
 
     private static final int WAITING_TIMEOUT = 100;
 
     private final BlockingQueue<String> queue;
-    private final NettyPersonCreatorThread producerThread;
+    private final AbstractNettyCreatorThread producerThread;
     private final ThroughputLoggingThread loggingThread;
     private final AtomicLong currentRecords = new AtomicLong();
     private final SocketChannel channel;
@@ -31,15 +31,16 @@ public class NettyPersonForwardingThread extends Thread {
     private volatile boolean interrupted = false;
     private long sendRecords;
 
-    NettyPersonForwardingThread(SocketChannel channel,
-                                NettyPersonCreatorThread.NettyPersonCreatorThreadProperties creatorProperties,
+    NettyStringForwardingThread(SocketChannel channel,
+                                BlockingQueue<String> queue,
+                                AbstractNettyCreatorThread creatorThread,
                                 ForwardingThread.ForwardingThreadProperties forwardingProperties,
                                 String name) {
         super(THREAD_NAME);
         this.channel = channel;
         this.forwardingProperties = forwardingProperties;
-        this.queue = new LinkedBlockingQueue<>();
-        this.producerThread = new NettyPersonCreatorThread(queue, creatorProperties);
+        this.queue = queue;
+        this.producerThread = creatorThread;
         this.loggingThread = new ThroughputLoggingThread(currentRecords, name);
     }
 
@@ -49,16 +50,16 @@ public class NettyPersonForwardingThread extends Thread {
 
             while (!interrupted && channel.isActive()) {
 
-                String person = queue.poll(WAITING_TIMEOUT, TimeUnit.MILLISECONDS);
+                String record = queue.poll(WAITING_TIMEOUT, TimeUnit.MILLISECONDS);
 
-                if (person == null) {
+                if (record == null) {
                     break;
                 }
 
-                channel.writeAndFlush(person);
+                channel.writeAndFlush(record);
 
                 if (forwardingProperties.logMessages && sendRecords++ % forwardingProperties.logMessagesModulo == 0) {
-                    LOG.info("NettyForwardingThread consumed '{}'", person);
+                    LOG.info("NettyForwardingThread consumed '{}'", record);
                 }
 
                 sendRecords++;

@@ -41,7 +41,7 @@ public abstract class Benchmark<T> {
     protected int maxNumberOfMessages = 500;
 
     @Parameter(names = {"-l", "--logMessages"}, description = "Displays log messages for the creation and sending progress")
-    private boolean logMessages = true;
+    private boolean logMessages = false;
 
     @Parameter(names = {"-mo", "--logModulo"}, description = "Only display log messages for only ever n-th record")
     private int logMessagesModulo = 50;

@@ -19,6 +19,9 @@ package de.adrian.thesis.generator.benchmark.netty;
 import com.beust.jcommander.Parameter;
 import de.adrian.thesis.generator.benchmark.Benchmark;
 import de.adrian.thesis.generator.benchmark.javaio.ForwardingThread;
+import de.adrian.thesis.generator.benchmark.netty.creators.AbstractNettyCreatorThread;
+import de.adrian.thesis.generator.benchmark.netty.creators.NettyAuctionCreatorThread;
+import de.adrian.thesis.generator.benchmark.netty.creators.NettyPersonCreatorThread;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.EpollEventLoopGroup;
@@ -38,8 +41,14 @@ public final class NettyBenchmark extends Benchmark {
 
     static final ChannelGroup CHANNELS = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
-    @Parameter(names = {"-iP", "--initialPersons"}, description = "Set initial people to create")
+    @Parameter(names = {"-iP", "--initialRecords"}, description = "Set initial people to create")
     private int initialPersons = 50;
+
+    @Parameter(names = {"-aD", "--auctionDelay"}, description = "Sets delay, which the auction creator thread should wait")
+    private int auctionDelay = 10;
+
+    @Parameter(names = {"-pD", "--personDelay"}, description = "Sets delay, which the person creator thread should wait")
+    private int personDelay = 100;
 
     private NettyBenchmark(String[] args) {
         super(args);
@@ -54,9 +63,12 @@ public final class NettyBenchmark extends Benchmark {
     @Override
     public void startGenerator() {
 
-        NettyPersonCreatorThread.NettyPersonCreatorThreadProperties creatorProperties =
-                new NettyPersonCreatorThread.NettyPersonCreatorThreadProperties(getCreatorProperties());
-        creatorProperties.setInitialPersons(initialPersons);
+        NettyAuctionCreatorThread.WAIT_DURATION = auctionDelay;
+        NettyPersonCreatorThread.WAIT_DURATION = personDelay;
+
+        AbstractNettyCreatorThread.AbstractNettyCreatorThreadProperties creatorProperties =
+                new AbstractNettyCreatorThread.AbstractNettyCreatorThreadProperties(getCreatorProperties());
+        creatorProperties.setInitialRecords(initialPersons);
 
         ForwardingThread.ForwardingThreadProperties forwardingProperties = getForwardingProperties();
 

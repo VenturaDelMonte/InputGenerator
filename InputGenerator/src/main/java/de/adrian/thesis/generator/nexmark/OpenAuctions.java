@@ -62,16 +62,16 @@ class OpenAuctions {
     private int allocSize; // allocated size of openAuctions array
     private OpenAuction[] openAuctions;
     private Random random = new Random(18394);
-    private SimpleCalendar cal;
+    private final SimpleCalendar calendar;
 
-    OpenAuctions(SimpleCalendar cal) {
-        allocSize = 3000;
-        openAuctions = new OpenAuction[allocSize];
-        this.cal = cal;
+    OpenAuctions(SimpleCalendar calendar) {
+        this.allocSize = 3000;
+        this.openAuctions = new OpenAuction[allocSize];
+        this.calendar = calendar;
     }
 
     // creates the open auction instance as well as returning the new id
-    public int getNewId() {
+    synchronized public int getNewId() {
         // don't bother to reuse the open auction objects - uugh, need to do this fast KT
         checkSpace(); // check to see if openAuctions needs to be expanded
 
@@ -80,7 +80,7 @@ class OpenAuctions {
         assert !(currPhysId + offset == Integer.MAX_VALUE) :
                 "KT: virtual Id is going to overflow - drats!!!";
         int virtualId = currPhysId + offset;
-        OpenAuction newItem = new OpenAuction(cal, virtualId, random);
+        OpenAuction newItem = new OpenAuction(calendar, virtualId, random);
         openAuctions[currPhysId] = newItem;
         currPhysId++;
         if (virtualId == highChunk * ITEM_DISTRIBUTION_SIZE) {
@@ -89,7 +89,7 @@ class OpenAuctions {
         return virtualId;
     }
 
-    public int getExistingId() {  // used by generateBid 
+    synchronized public int getExistingId() {  // used by generateBid
         int id;
         do {
             // generates an id between 0 and ITEM_DISTRIBUTION_SIZE
@@ -101,7 +101,7 @@ class OpenAuctions {
 
             // is closed checks to see if auction should be closed and closes
             // it if necessary
-        } while (id >= currPhysId || openAuctions[id].isClosed(cal));
+        } while (id >= currPhysId || openAuctions[id].isClosed(calendar));
         openAuctions[id].recordBid();
         return id + offset; // return virtual id
     }

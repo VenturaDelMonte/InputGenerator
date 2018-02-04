@@ -152,10 +152,10 @@ public class ForwardingThread<T> extends Thread {
 
     public static class ForwardingThreadProperties {
         public int port;
-        public boolean logMessages = true;
-        public int logMessagesModulo = 50;
-        public boolean logThroughput = true;
-        public String name = "DefaultInstance";
+        public boolean logMessages;
+        public int logMessagesModulo;
+        public boolean logThroughput;
+        public String name;
         public int serverTimeout;
 
         public ForwardingThreadProperties setPort(int port) {
