@@ -26,9 +26,14 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.DatagramPacketEncoder;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import io.netty.handler.codec.Delimiters;
+import io.netty.handler.codec.string.LineEncoder;
+import io.netty.handler.codec.string.LineSeparator;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import io.netty.util.CharsetUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -69,15 +74,10 @@ public class NettyBenchmarkRequestInitializer<T> extends ChannelInitializer<Sock
 
         ChannelPipeline pipeline = channel.pipeline();
 
-        ByteBuf[] delimiters = new ByteBuf[] {
-                Unpooled.wrappedBuffer(new byte[] { '\r', '\n' }), // WINDOWS
-                Unpooled.wrappedBuffer(new byte[] { '\n' }),       // UNIX / OSX
-                Unpooled.wrappedBuffer(new byte[] { '\r' })        // LEGACY MAC
-        };
-        pipeline.addLast("DelimiterFramer", new DelimiterBasedFrameDecoder(MAX_FRAME_LENGTH, delimiters));
-
+        pipeline.addLast("DelimiterFramer", new DelimiterBasedFrameDecoder(MAX_FRAME_LENGTH, Delimiters.lineDelimiter()));
         pipeline.addLast(DECODER);
-        pipeline.addLast(ENCODER);
+
+        pipeline.addLast("LineEncoder", new LineEncoder(LineSeparator.DEFAULT, CharsetUtil.UTF_8));
 
         String instanceName = forwardingProperties.name + instanceNumber++;
 
