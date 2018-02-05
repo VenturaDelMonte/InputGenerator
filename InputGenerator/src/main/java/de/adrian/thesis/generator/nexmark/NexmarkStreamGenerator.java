@@ -31,13 +31,16 @@ package de.adrian.thesis.generator.nexmark;/*
 */
 
 import de.adrian.thesis.generator.nexmark.data.AuctionType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class NexmarkStreamGenerator {
+
+    private static final Logger LOG = LogManager.getLogger(NexmarkStreamGenerator.class);
 
     private static final boolean LIMIT_ATTRIBUTES = false;
 
@@ -156,7 +159,8 @@ public class NexmarkStreamGenerator {
 
     /**
      * Generates auctions. Previous note: A Person may be selling items for a different regions.
-     * Does not matter for out use case.
+     * Does not matter for out use case. Schema:
+     * auction_id,item_id,seller_id,price,category_id,quantity,type,start,end
      *
      * @param limitAttributes Whether to use the full output
      */
@@ -165,38 +169,40 @@ public class NexmarkStreamGenerator {
 
         StringBuilder builder = new StringBuilder(200);
 
-        // initial, reserve?, bidder*, current, privacy?, itemref, seller, annotation, quantity, type, interval
+        long currentTimeMillis = System.currentTimeMillis();
 
-        builder.append("auction_id=");
+        builder.append(currentTimeMillis);
+        builder.append(",");
+
         int auctionId = openAuctions.getNewId();
         builder.append(auctionId);
 
         // Assume itemId and openAuctionId are same, therefore only one auction per item allowed
-        builder.append(",item_id=");
+        builder.append(",");
         builder.append(auctionId);
 
-        builder.append(",seller_id=");
+        builder.append(",");
         builder.append(persons.getExistingId());
 
+        builder.append(",");
+        builder.append((int) Math.round((openAuctions.getCurrPrice(auctionId)) * (1.2 + (random.nextDouble() + 1))));
+
         // Original benchmark allows up to 10 categories, we allow an item to be in one category
-        builder.append(",category=");
+        builder.append(",");
         int category_id = random.nextInt(PersonGenerator.NUM_CATEGORIES);
         builder.append(category_id);
 
-        if (!LIMIT_ATTRIBUTES) {
+        builder.append(",");
+        int quantity = 1 + random.nextInt(10);
+        builder.append(quantity);
 
-            builder.append(",quantity=");
-            int quantity = 1 + random.nextInt(10);
-            builder.append(quantity);
+//        builder.append(",");
+//        builder.append(AuctionType.AUCTION_TYPE[random.nextInt(AuctionType.AUCTION_TYPE.length)]);
 
-            builder.append(",type=");
-            builder.append(AuctionType.AUCTION_TYPE[random.nextInt(AuctionType.AUCTION_TYPE.length)]);
-
-            builder.append(",start=");
-            builder.append(calendar.getTimeInSecs());
-            builder.append(",end=");
-            builder.append(openAuctions.getEndTime(auctionId));
-        }
+        builder.append(",");
+        builder.append(calendar.getTimeInSecs());
+        builder.append(",");
+        builder.append(openAuctions.getEndTime(auctionId));
 
         return builder.toString();
     }
@@ -207,90 +213,54 @@ public class NexmarkStreamGenerator {
 
     /**
      * Generates persons based on the following schema:
+     * person_id,name,email_address,phone,street,city,country,province,zipcode,homepage,creditcard
      */
     public String generatePerson(boolean limitAttributes) {
         calendar.incrementTime();
 
-        StringBuilder generator = new StringBuilder(200);
+        StringBuilder builder = new StringBuilder(200);
+
+        long currentTimeMillis = System.currentTimeMillis();
+
+        builder.append(currentTimeMillis);
+        builder.append(",");
 
         personGenerator.generateValues(openAuctions); // person object is reusable now
 
-        generator.append("person,id=");
-        generator.append(persons.getNewId());
+        builder.append(String.valueOf(persons.getNewId()));
 
-        generator.append(",name=");
-        generator.append(personGenerator.name);
+        builder.append(",");
+        builder.append(personGenerator.name);
 
-        generator.append(",emailaddress=");
-        generator.append(personGenerator.email);
+        builder.append(",");
+        builder.append(personGenerator.email);
 
-        if (!limitAttributes) {
-            if (personGenerator.hasPhone) {
-                generator.append(",phone=");
-                generator.append(personGenerator.phone);
-            }
-            if (personGenerator.hasAddress) {
+        builder.append(",");
+        builder.append(personGenerator.phone);
 
-                generator.append(",street=");
-                generator.append(personGenerator.address.street);
+        // TODO Bug in street generation? Multiple St's
+        builder.append(",");
+        builder.append(personGenerator.address.street);
 
-                generator.append(",city=");
-                generator.append(personGenerator.address.city);
+        builder.append(",");
+        builder.append(personGenerator.address.city);
 
-                generator.append(",coutry=");
-                generator.append(personGenerator.address.country);
+        builder.append(",");
+        builder.append(personGenerator.address.country);
 
-                generator.append(",province=");
-                generator.append(personGenerator.address.province);
+        builder.append(",");
+        builder.append(personGenerator.address.province);
 
-                generator.append(",zipcode=");
-                generator.append(personGenerator.address.zipcode);
-            }
+        builder.append(",");
+        builder.append(personGenerator.address.zipcode);
 
-            if (personGenerator.hasHomepage) {
-                generator.append(",homepage=");
-                generator.append(personGenerator.homepage);
-            }
-            if (personGenerator.hasCreditcard) {
-                generator.append(",creditcard=");
-                generator.append(personGenerator.creditcard);
-            }
+        builder.append(",");
+        builder.append(personGenerator.homepage);
 
-            if (personGenerator.hasProfile) {
-                generator.append(",income=");
-                generator.append(personGenerator.profile.income);
+        builder.append(",");
+        builder.append(personGenerator.creditcard);
 
-                generator.append(",interest_category=");
-
-                for (int j = 0; j < personGenerator.profile.interests.size(); j++) {
-                    generator.append(personGenerator.profile.interests.get(j));
-                    if (j + 1 != personGenerator.profile.interests.size()) {
-                        generator.append(":");
-                    }
-                }
-
-                if (personGenerator.profile.hasEducation) {
-                    generator.append(",education=");
-                    generator.append(personGenerator.profile.education);
-                }
-                if (personGenerator.profile.hasGender) {
-                    generator.append(",gender=");
-                    generator.append(personGenerator.profile.gender);
-                }
-
-                generator.append(",business=");
-                generator.append(personGenerator.profile.business);
-
-                if (personGenerator.profile.hasAge) {
-                    generator.append(",age=");
-                    generator.append(personGenerator.profile.age);
-                }
-            }
-        }
-
-        generator.append(NEWLINE);
-
-        return generator.toString();
+        return builder.toString();
     }
 }
 

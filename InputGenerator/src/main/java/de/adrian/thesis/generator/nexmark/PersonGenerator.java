@@ -66,10 +66,6 @@ public class PersonGenerator {
         public String zipcode;
     }
 
-    public boolean hasPhone;
-    public boolean hasAddress;
-    public boolean hasHomepage;
-    public boolean hasCreditcard;
     public boolean hasProfile;
     public boolean hasWatches;
 
@@ -91,56 +87,41 @@ public class PersonGenerator {
         name.put(Firstnames.FIRSTNAMES[ifn]);
         name.put(" ");
         name.put(Lastnames.LASTNAMES[iln]);
+        name.rewind();
 
         email.clear();
         email.put(Lastnames.LASTNAMES[iln]);
         email.put("@");
         email.put(Emails.EMAILS[iem]);
+        email.rewind();
 
-        if (random.nextBoolean()) {
-            hasPhone = true;
-            phone.clear();
-            phone.put("+");
-            phone.put(NumberMapping.STRINGS[random.nextInt(98) + 1]);
-            phone.put("(");
-            phone.put(NumberMapping.STRINGS[random.nextInt(989) + 10]);
-            phone.put(")");
-            phone.put(String.valueOf(random.nextInt(9864196) + 123457));
-        } else {
-            hasPhone = false;
-        }
+        phone.clear();
+        phone.put("+");
+        phone.put(NumberMapping.STRINGS[random.nextInt(98) + 1]);
+        phone.put("(");
+        phone.put(NumberMapping.STRINGS[random.nextInt(989) + 10]);
+        phone.put(")");
+        phone.put(String.valueOf(random.nextInt(9864196) + 123457));
+        phone.rewind();
 
-        if (random.nextBoolean()) {
-            hasAddress = true;
-            genAddress();
-        } else {
-            hasAddress = false;
-        }
+        genAddress();
 
-        if (random.nextBoolean()) {
-            hasHomepage = true;
-            homepage.clear();
-            homepage.put("http://www.");
-            homepage.put(Emails.EMAILS[iem]);
-            homepage.put("/~");
-            homepage.put(Lastnames.LASTNAMES[iln]);
-        } else {
-            hasHomepage = false;
-        }
+        homepage.clear();
+        homepage.put("http://www.");
+        homepage.put(Emails.EMAILS[iem]);
+        homepage.put("/~");
+        homepage.put(Lastnames.LASTNAMES[iln]);
+        homepage.rewind();
 
-        if (random.nextBoolean()) {
-            hasCreditcard = true;
-            creditcard.clear();
-            creditcard.put(String.valueOf(random.nextInt(9000) + 1000)); //HERE
-            creditcard.put(" ");
-            creditcard.put(String.valueOf(random.nextInt(9000) + 1000)); //HERE
-            creditcard.put(" ");
-            creditcard.put(String.valueOf(random.nextInt(9000) + 1000)); //HERE
-            creditcard.put(" ");
-            creditcard.put(String.valueOf(random.nextInt(9000) + 1000)); //HERE
-        } else {
-            hasCreditcard = false;
-        }
+        creditcard.clear();
+        creditcard.put(String.valueOf(random.nextInt(9000) + 1000));
+        creditcard.put(" ");
+        creditcard.put(String.valueOf(random.nextInt(9000) + 1000));
+        creditcard.put(" ");
+        creditcard.put(String.valueOf(random.nextInt(9000) + 1000));
+        creditcard.put(" ");
+        creditcard.put(String.valueOf(random.nextInt(9000) + 1000));
+        creditcard.rewind();
 
         if (random.nextBoolean()) {
             hasProfile = true;
@@ -177,6 +158,7 @@ public class PersonGenerator {
         address.street.put(" ");
         address.street.put(Lastnames.LASTNAMES[ist]);
         address.street.put(" St");
+        address.street.rewind();
 
         address.city = Cities.CITIES[ict];
 
