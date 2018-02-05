@@ -19,7 +19,7 @@ public class NettyStringForwardingThread extends Thread {
 
     private static final String THREAD_NAME = "NettyStringForwardingThread";
 
-    private static final int WAITING_TIMEOUT = 100;
+    private static final int WAITING_TIMEOUT = 1000;
 
     private final BlockingQueue<String> queue;
     private final AbstractNettyCreatorThread producerThread;
@@ -41,7 +41,9 @@ public class NettyStringForwardingThread extends Thread {
         this.forwardingProperties = forwardingProperties;
         this.queue = queue;
         this.producerThread = creatorThread;
-        this.loggingThread = new ThroughputLoggingThread(currentRecords, name);
+        this.loggingThread = new ThroughputLoggingThread(
+                currentRecords,
+                name + "-" + creatorThread.getShortDescription());
     }
 
     @Override

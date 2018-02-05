@@ -66,6 +66,8 @@ public abstract class AbstractNettyCreatorThread extends Thread {
 
     abstract long getWaitingDuration();
 
+    public abstract String getShortDescription();
+
     public void stopProducing() {
         interrupt();
         interrupted = true;

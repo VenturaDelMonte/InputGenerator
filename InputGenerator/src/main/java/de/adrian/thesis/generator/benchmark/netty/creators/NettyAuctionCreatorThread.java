@@ -11,7 +11,7 @@ public class NettyAuctionCreatorThread extends AbstractNettyCreatorThread {
 
     private final static String THREAD_NAME = "NettyAuctionCreatorThread";
 
-    public static long WAIT_DURATION = 100;
+    public static long WAIT_DURATION = 10;
 
     public NettyAuctionCreatorThread(Queue<String> queue, AbstractNettyCreatorThreadProperties properties) {
         super(THREAD_NAME, queue, properties);
@@ -25,5 +25,10 @@ public class NettyAuctionCreatorThread extends AbstractNettyCreatorThread {
     @Override
     long getWaitingDuration() {
         return WAIT_DURATION;
+    }
+
+    @Override
+    public String getShortDescription() {
+        return "auctions";
     }
 }

@@ -14,7 +14,7 @@ public class NettyPersonCreatorThread extends AbstractNettyCreatorThread {
 
     private final static String THREAD_NAME = "NettyPersonCreatorThread";
 
-    public static long WAIT_DURATION = 10;
+    public static long WAIT_DURATION = 100;
 
     public NettyPersonCreatorThread(Queue<String> queue, AbstractNettyCreatorThreadProperties properties) {
         super(THREAD_NAME, queue, properties);
@@ -28,5 +28,10 @@ public class NettyPersonCreatorThread extends AbstractNettyCreatorThread {
     @Override
     long getWaitingDuration() {
         return WAIT_DURATION;
+    }
+
+    @Override
+    public String getShortDescription() {
+        return "persons";
     }
 }
