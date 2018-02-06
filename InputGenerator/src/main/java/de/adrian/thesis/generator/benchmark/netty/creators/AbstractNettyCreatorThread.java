@@ -24,7 +24,7 @@ public abstract class AbstractNettyCreatorThread extends Thread {
         super(threadName);
         this.queue = queue;
         this.properties = properties;
-        this.nexmarkGenerator = NexmarkStreamGenerator.GetInstance();
+        this.nexmarkGenerator = new NexmarkStreamGenerator();
     }
 
     @Override

@@ -36,23 +36,23 @@ class SimpleCalendar {
 
     private static final int MAX_INCREMENT_SEC = 60;
 
-    private int time_in_seconds = 0; // time in seconds
-    private Random rnd;
+    private int timeInSeconds = 0;
+    private Random random;
 
-    SimpleCalendar(Random rnd) {
-        this.rnd = rnd;
+    SimpleCalendar(Random random) {
+        this.random = random;
     }
 
     int getTimeInSecs() {
-        return time_in_seconds;
+        return timeInSeconds;
     }
 
     int getTimeInMS() {
-        return time_in_seconds * 1000;
+        return timeInSeconds * 1000;
     }
 
     synchronized void incrementTime() {
-        time_in_seconds += rnd.nextInt(MAX_INCREMENT_SEC); // 1000 millesecons per second
-        assert time_in_seconds >= 0 : "Time overflow";
+        timeInSeconds += random.nextInt(MAX_INCREMENT_SEC); // 1000 millesecons per second
+        assert timeInSeconds >= 0 : "Time overflow";
     }
 }

@@ -62,102 +62,88 @@ public class PersonGenerator {
         public CharBuffer income = CharBuffer.allocate(30);
     }
 
-    class Address {
-        public CharBuffer street = CharBuffer.allocate(100);
-        public String city;
-        public String province;
-        public String country;
-        public String zipcode;
-    }
-
-    public boolean hasProfile;
-
-    public CharBuffer name = CharBuffer.allocate(100);
-    public CharBuffer email = CharBuffer.allocate(100);
-    public CharBuffer phone = CharBuffer.allocate(15);
-    public Address address = new Address();
-    public CharBuffer homepage = CharBuffer.allocate(100);
-    public CharBuffer creditcard = CharBuffer.allocate(20);
     public Profile profile = new Profile();
 
-    public void generateValues() {
+    public void generateValues(StringBuilder builder, boolean limitAttributes) {
         int ifn = random.nextInt(Firstnames.NUM_FIRSTNAMES);
         int iln = random.nextInt(Lastnames.NUM_LASTNAMES);
         int iem = random.nextInt(Emails.NUM_EMAILS);
 
-        name.clear();
-        name.put(Firstnames.FIRSTNAMES[ifn]);
-        name.put(" ");
-        name.put(Lastnames.LASTNAMES[iln]);
-        name.flip();
+        // First Name
+        builder.append(",");
+        builder.append(Firstnames.FIRSTNAMES[ifn]);
+        builder.append(" ");
+        builder.append(Lastnames.LASTNAMES[iln]);
 
-        email.clear();
-        email.put(Lastnames.LASTNAMES[iln]);
-        email.put("@");
-        email.put(Emails.EMAILS[iem]);
-        email.flip();
+        builder.append(",");
+        builder.append(Lastnames.LASTNAMES[iln]);
+        builder.append("@");
+        builder.append(Emails.EMAILS[iem]);
 
-        phone.clear();
-        phone.put("+");
-        phone.put(NumberMapping.STRINGS[random.nextInt(98) + 1]);
-        phone.put("(");
-        phone.put(NumberMapping.STRINGS[random.nextInt(989) + 10]);
-        phone.put(")");
-        phone.put(String.valueOf(random.nextInt(9864196) + 123457));
-        phone.flip();
+        // Phone number
+        builder.append(",");
+        builder.append("+");
+        builder.append(NumberMapping.STRINGS[random.nextInt(98) + 1]);
+        builder.append("(");
+        builder.append(NumberMapping.STRINGS[random.nextInt(989) + 10]);
+        builder.append(")");
+        builder.append(String.valueOf(random.nextInt(9864196) + 123457));
 
-        genAddress();
+        genAddress(builder);
 
-        homepage.clear();
-        homepage.put("http://www.");
-        homepage.put(Emails.EMAILS[iem]);
-        homepage.put("/~");
-        homepage.put(Lastnames.LASTNAMES[iln]);
-        homepage.flip();
+        // Homepage
+        builder.append(",");
+        builder.append("http://www.");
+        builder.append(Emails.EMAILS[iem]);
+        builder.append("/~");
+        builder.append(Lastnames.LASTNAMES[iln]);
 
-        creditcard.clear();
-        creditcard.put(String.valueOf(random.nextInt(9000) + 1000));
-        creditcard.put(" ");
-        creditcard.put(String.valueOf(random.nextInt(9000) + 1000));
-        creditcard.put(" ");
-        creditcard.put(String.valueOf(random.nextInt(9000) + 1000));
-        creditcard.put(" ");
-        creditcard.put(String.valueOf(random.nextInt(9000) + 1000));
-        creditcard.flip();
+        // Creditcard
+        builder.append(",");
+        builder.append(String.valueOf(random.nextInt(9000) + 1000));
+        builder.append(" ");
+        builder.append(String.valueOf(random.nextInt(9000) + 1000));
+        builder.append(" ");
+        builder.append(String.valueOf(random.nextInt(9000) + 1000));
+        builder.append(" ");
+        builder.append(String.valueOf(random.nextInt(9000) + 1000));
 
-        if (random.nextBoolean()) {
-            hasProfile = true;
+        // TODO Add profile as well
+        if (limitAttributes) {
             genProfile();
-        } else {
-            hasProfile = false;
         }
     }
 
-    private void genAddress() {
+    private void genAddress(StringBuilder builder) {
         int ist = random.nextInt(Lastnames.NUM_LASTNAMES); // street
         int ict = random.nextInt(Cities.NUM_CITIES); // city
-        int icn = (random.nextInt(4) != 0) ? 0 :
-                random.nextInt(Countries.NUM_COUNTRIES);
-        int ipv = (icn == 0) ? random.nextInt(Provinces.NUM_PROVINCES) :
-                random.nextInt(Lastnames.NUM_LASTNAMES);  // PROVINCES are really states
+        int icn = (random.nextInt(4) != 0) ? 0 : random.nextInt(Countries.NUM_COUNTRIES);
+        int ipv = (icn == 0) ? random.nextInt(Provinces.NUM_PROVINCES) : random.nextInt(Lastnames.NUM_LASTNAMES);  // PROVINCES are really states
 
-        address.street.clear();
-        address.street.put(String.valueOf((random.nextInt(99) + 1)));
-        address.street.put(" ");
-        address.street.put(Lastnames.LASTNAMES[ist]);
-        address.street.put(" St");
-        address.street.flip();
+        // Street
+        builder.append(",");
+        builder.append(String.valueOf((random.nextInt(99) + 1)));
+        builder.append(" ");
+        builder.append(Lastnames.LASTNAMES[ist]);
+        builder.append(" St");
 
-        address.city = Cities.CITIES[ict];
+        // City
+        builder.append(",");
+        builder.append(Cities.CITIES[ict]);
 
+        // Country
+        builder.append(",");
         if (icn == 0) {
-            address.country = "United States";
-            address.province = Provinces.PROVINCES[ipv];
+            builder.append("United States");
+            builder.append(Provinces.PROVINCES[ipv]);
         } else {
-            address.country = Countries.COUNTRIES[icn];
-            address.province = Lastnames.LASTNAMES[ipv];
+            builder.append(Countries.COUNTRIES[icn]);
+            builder.append(Lastnames.LASTNAMES[ipv]);
         }
-        address.zipcode = String.valueOf(random.nextInt(99999) + 1);
+
+        // Zipcode
+        builder.append(",");
+        builder.append(String.valueOf(random.nextInt(99999) + 1));
     }
 
     private void genProfile() {

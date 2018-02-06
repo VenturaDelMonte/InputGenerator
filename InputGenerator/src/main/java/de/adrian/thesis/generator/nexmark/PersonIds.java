@@ -30,42 +30,33 @@ package de.adrian.thesis.generator.nexmark;/*
 
 */
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Keeps track of the globally unique person ids. Previously, some more or less profound algorithm has been used.
+ * This version simply draws the id uniformly.
+ */
 class PersonIds {
 
-    private static int PERSON_DISTRIBUTION_SIZE = 100;
+    private final ThreadLocalRandom random;
+    private static final AtomicLong highestPersonId = new AtomicLong();
 
-    // persons dont go away so lowChunk is always 0
-    private int highChunk = 1;
-    private int currentId = -1;
-    private Random random = new Random(283494);
+//    public PersonIds() {
+//        this.random = new Random(283494);
+//    }
+
+    public PersonIds(ThreadLocalRandom random) {
+        this.random = random;
+    }
 
     // creates the open auction instance as well as returning the new id
-    synchronized int getNewId() {
-        currentId++;
-        int newId = currentId;
-        if (newId == highChunk * PERSON_DISTRIBUTION_SIZE) {
-            highChunk++;
-        }
-        return newId;
+    long getNewId() {
+        return highestPersonId.getAndIncrement();
     }
 
-    synchronized int getExistingId() {
-
-        if (currentId == -1) {
-            // TODO Ignore for now, that initially, some Auctions are created without actual persons
-//            throw new IllegalStateException("No persons have been created so far");
-        }
-
-        int id = random.nextInt(PERSON_DISTRIBUTION_SIZE);
-        id += getRandomChunkOffset();
-        return id % currentId;
-    }
-
-    private int getRandomChunkOffset() {
-        int chunkId = random.nextInt(highChunk);
-        return chunkId * PERSON_DISTRIBUTION_SIZE;
+    long getExistingId() {
+        return random.nextLong(highestPersonId.get());
     }
 }
 

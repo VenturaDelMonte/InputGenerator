@@ -46,28 +46,17 @@ public class NexmarkStreamGenerator {
     private final String NEWLINE = System.lineSeparator();
 
     // will generate bids, items and persons in a ratio of 10 bids/item 5 items/person
-    private final ThreadLocalRandom random = ThreadLocalRandom.current(); // Maybe replace with ThreadLocalRandom
+    private final ThreadLocalRandom random = ThreadLocalRandom.current();
     private final SimpleCalendar calendar = new SimpleCalendar(random);
-    private final PersonIds personIds = new PersonIds(); // for managing person ids
+    private final PersonIds personIds = new PersonIds(random);
     private final Bids bids = new Bids();
-    private final OpenAuctions openAuctions = new OpenAuctions(calendar); // for managing open auctions
+    private final OpenAuctions openAuctions = new OpenAuctions(calendar);
     private final PersonGenerator personGenerator = new PersonGenerator();
 
     private Buffer buffer;
     private BufferedWriter writer;
 
-    private static NexmarkStreamGenerator INSTANCE;
-
-    private NexmarkStreamGenerator() {
-    }
-
-    public static NexmarkStreamGenerator GetInstance() {
-
-        if (INSTANCE == null) {
-            INSTANCE = new NexmarkStreamGenerator();
-        }
-
-        return INSTANCE;
+    public NexmarkStreamGenerator() {
     }
 
     public void generateStream(BufferedWriter writer) throws IOException {
@@ -222,41 +211,11 @@ public class NexmarkStreamGenerator {
         long currentTimeMillis = System.currentTimeMillis();
 
         builder.append(currentTimeMillis);
-        builder.append(",");
-
-        personGenerator.generateValues(); // person object is reusable now
-
-        builder.append(String.valueOf(personIds.getNewId()));
 
         builder.append(",");
-        builder.append(personGenerator.name);
+        builder.append(personIds.getNewId());
 
-        builder.append(",");
-        builder.append(personGenerator.email);
-
-        builder.append(",");
-        builder.append(personGenerator.phone);
-
-        builder.append(",");
-        builder.append(personGenerator.address.street);
-
-        builder.append(",");
-        builder.append(personGenerator.address.city);
-
-        builder.append(",");
-        builder.append(personGenerator.address.country);
-
-        builder.append(",");
-        builder.append(personGenerator.address.province);
-
-        builder.append(",");
-        builder.append(personGenerator.address.zipcode);
-
-        builder.append(",");
-        builder.append(personGenerator.homepage);
-
-        builder.append(",");
-        builder.append(personGenerator.creditcard);
+        personGenerator.generateValues(builder, limitAttributes);
 
         return builder.toString();
     }
