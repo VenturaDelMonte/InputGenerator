@@ -32,7 +32,7 @@ package de.adrian.thesis.generator.nexmark;/*
 
 import java.util.Random;
 
-class Persons {
+class PersonIds {
 
     private static int PERSON_DISTRIBUTION_SIZE = 100;
 

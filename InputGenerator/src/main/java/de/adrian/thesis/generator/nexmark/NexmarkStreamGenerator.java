@@ -30,7 +30,6 @@ package de.adrian.thesis.generator.nexmark;/*
 
 */
 
-import de.adrian.thesis.generator.nexmark.data.AuctionType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -49,7 +48,7 @@ public class NexmarkStreamGenerator {
     // will generate bids, items and persons in a ratio of 10 bids/item 5 items/person
     private final ThreadLocalRandom random = ThreadLocalRandom.current(); // Maybe replace with ThreadLocalRandom
     private final SimpleCalendar calendar = new SimpleCalendar(random);
-    private final Persons persons = new Persons(); // for managing person ids
+    private final PersonIds personIds = new PersonIds(); // for managing person ids
     private final Bids bids = new Bids();
     private final OpenAuctions openAuctions = new OpenAuctions(calendar); // for managing open auctions
     private final PersonGenerator personGenerator = new PersonGenerator();
@@ -145,7 +144,7 @@ public class NexmarkStreamGenerator {
             //myb.append(ts);
 
             buffer.append(",person_ref=");
-            buffer.append(persons.getExistingId());
+            buffer.append(personIds.getExistingId());
 
             buffer.append(",bid=");
             buffer.append(openAuctions.increasePrice(itemId));
@@ -182,7 +181,7 @@ public class NexmarkStreamGenerator {
         builder.append(auctionId);
 
         builder.append(",");
-        builder.append(persons.getExistingId());
+        builder.append(personIds.getExistingId());
 
         builder.append(",");
         builder.append((int) Math.round((openAuctions.getCurrPrice(auctionId)) * (1.2 + (random.nextDouble() + 1))));
@@ -225,9 +224,9 @@ public class NexmarkStreamGenerator {
         builder.append(currentTimeMillis);
         builder.append(",");
 
-        personGenerator.generateValues(openAuctions); // person object is reusable now
+        personGenerator.generateValues(); // person object is reusable now
 
-        builder.append(String.valueOf(persons.getNewId()));
+        builder.append(String.valueOf(personIds.getNewId()));
 
         builder.append(",");
         builder.append(personGenerator.name);
@@ -238,7 +237,6 @@ public class NexmarkStreamGenerator {
         builder.append(",");
         builder.append(personGenerator.phone);
 
-        // TODO Bug in street generation? Multiple St's
         builder.append(",");
         builder.append(personGenerator.address.street);
 

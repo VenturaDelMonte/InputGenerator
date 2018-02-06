@@ -37,10 +37,14 @@ import java.nio.CharBuffer;
 import java.util.Random;
 import java.util.Vector;
 
+/**
+ * Generates a person object to be send for the Nexmark Benchmark.
+ */
 public class PersonGenerator {
 
     public static int NUM_CATEGORIES = 1000;
 
+    // Currently generate the same person data every time
     private final Random random = new Random(20934);
 
     class Profile {
@@ -67,7 +71,6 @@ public class PersonGenerator {
     }
 
     public boolean hasProfile;
-    public boolean hasWatches;
 
     public CharBuffer name = CharBuffer.allocate(100);
     public CharBuffer email = CharBuffer.allocate(100);
@@ -76,9 +79,8 @@ public class PersonGenerator {
     public CharBuffer homepage = CharBuffer.allocate(100);
     public CharBuffer creditcard = CharBuffer.allocate(20);
     public Profile profile = new Profile();
-    public Vector watches = new Vector();
 
-    public void generateValues(OpenAuctions auctions) {
+    public void generateValues() {
         int ifn = random.nextInt(Firstnames.NUM_FIRSTNAMES);
         int iln = random.nextInt(Lastnames.NUM_LASTNAMES);
         int iem = random.nextInt(Emails.NUM_EMAILS);
@@ -87,13 +89,13 @@ public class PersonGenerator {
         name.put(Firstnames.FIRSTNAMES[ifn]);
         name.put(" ");
         name.put(Lastnames.LASTNAMES[iln]);
-        name.rewind();
+        name.flip();
 
         email.clear();
         email.put(Lastnames.LASTNAMES[iln]);
         email.put("@");
         email.put(Emails.EMAILS[iem]);
-        email.rewind();
+        email.flip();
 
         phone.clear();
         phone.put("+");
@@ -102,7 +104,7 @@ public class PersonGenerator {
         phone.put(NumberMapping.STRINGS[random.nextInt(989) + 10]);
         phone.put(")");
         phone.put(String.valueOf(random.nextInt(9864196) + 123457));
-        phone.rewind();
+        phone.flip();
 
         genAddress();
 
@@ -111,7 +113,7 @@ public class PersonGenerator {
         homepage.put(Emails.EMAILS[iem]);
         homepage.put("/~");
         homepage.put(Lastnames.LASTNAMES[iln]);
-        homepage.rewind();
+        homepage.flip();
 
         creditcard.clear();
         creditcard.put(String.valueOf(random.nextInt(9000) + 1000));
@@ -121,7 +123,7 @@ public class PersonGenerator {
         creditcard.put(String.valueOf(random.nextInt(9000) + 1000));
         creditcard.put(" ");
         creditcard.put(String.valueOf(random.nextInt(9000) + 1000));
-        creditcard.rewind();
+        creditcard.flip();
 
         if (random.nextBoolean()) {
             hasProfile = true;
@@ -129,20 +131,6 @@ public class PersonGenerator {
         } else {
             hasProfile = false;
         }
-
-        hasWatches = false;
-        /* skip watches for now -  expensive and problem with
-         * people who are generated before any items
-         if (random.nextBoolean()) {
-         int cWatches = random.nextInt(20) + 1;
-         int iWatch;
-         for (int i=0; i<cWatches; i++) {
-         // is this OK, will this screw up bids/items distribution??
-         watches.add(String.valueOf(auctions.getExistingId()));
-         }
-         } else {
-         watches.clear();
-         }*/
     }
 
     private void genAddress() {
@@ -158,7 +146,7 @@ public class PersonGenerator {
         address.street.put(" ");
         address.street.put(Lastnames.LASTNAMES[ist]);
         address.street.put(" St");
-        address.street.rewind();
+        address.street.flip();
 
         address.city = Cities.CITIES[ict];
 
