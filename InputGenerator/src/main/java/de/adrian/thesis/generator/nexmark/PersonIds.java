@@ -40,7 +40,8 @@ import java.util.concurrent.atomic.AtomicLong;
 class PersonIds {
 
     private final ThreadLocalRandom random;
-    private static final AtomicLong highestPersonId = new AtomicLong();
+    // Assign initial id 1, even though there might not exist a person with that id, simply assume there will be one in the future
+    private static final AtomicLong highestPersonId = new AtomicLong(1);
 
 //    public PersonIds() {
 //        this.random = new Random(283494);

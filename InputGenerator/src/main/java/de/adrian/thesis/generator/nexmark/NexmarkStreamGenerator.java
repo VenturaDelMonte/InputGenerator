@@ -49,9 +49,9 @@ public class NexmarkStreamGenerator {
     private final ThreadLocalRandom random = ThreadLocalRandom.current();
     private final SimpleCalendar calendar = new SimpleCalendar(random);
     private final PersonIds personIds = new PersonIds(random);
+    private final PersonGenerator personGenerator = new PersonGenerator(random);
     private final Bids bids = new Bids();
-    private final OpenAuctions openAuctions = new OpenAuctions(calendar);
-    private final PersonGenerator personGenerator = new PersonGenerator();
+    private final OpenAuctions openAuctions = new OpenAuctions(calendar, random);
 
     private Buffer buffer;
     private BufferedWriter writer;
@@ -120,7 +120,7 @@ public class NexmarkStreamGenerator {
             buffer.append("bid_id=");
             buffer.append(bidId);
 
-            int itemId = openAuctions.getExistingId();
+            long itemId = openAuctions.getExistingId();
 
             buffer.append(",auction_id=");
             buffer.append(itemId);
@@ -162,7 +162,7 @@ public class NexmarkStreamGenerator {
         builder.append(currentTimeMillis);
         builder.append(",");
 
-        int auctionId = openAuctions.getNewId();
+        long auctionId = openAuctions.createNewAuction();
         builder.append(auctionId);
 
         // Assume itemId and openAuctionId are same, therefore only one auction per item allowed

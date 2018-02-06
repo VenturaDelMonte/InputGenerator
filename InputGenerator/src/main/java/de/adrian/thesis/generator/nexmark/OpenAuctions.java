@@ -34,133 +34,45 @@ package de.adrian.thesis.generator.nexmark;/*
 // is capable of generating new ids or generating existing IDs
 // distributions supported are exponential and uniform
 
-import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicLong;
 
 class OpenAuctions {
 
-    private static int ITEM_DISTRIBUTION_SIZE = 100;
+    private static final ConcurrentHashMap<Long, OpenAuction> OPEN_AUCTIONS =
+            new ConcurrentHashMap<>(1_000_000, 0.8f, 8);
+    private static final AtomicLong AUCTION_IDS = new AtomicLong();
 
-    // This class manages an array of open auction objects - each containing information
-    // about an open auction.
-    // To allow an arbitrary number of open auctions, we implement a scheme with two
-    // arrays - one virtual, one physical. To code outside this class, the openAuctionId
-    // is an index into the virtual array. The virtual array starts at 0 and grows indefinitely.
-    // The physical array is a subarray of the virtual array - initial portions of the
-    // physical array are deleted as the items in those initial portions close.
-    // currPhysId indexes into the physical array, offset is the point in the virtual array
-    // where the physical array starts so currPhysId+offset is the highest virtual open
-    // auction id that has been issued.
-    // closedPoint is relative to physical array, lowChunk and highChunk are maintained
-    // relative to physical array
-
-    // manage physical and virtual arrays
-    private int currPhysId = 0; // physical
-    private int offset = 0; // index of start of physical in virtual
-    private int numSeqClosed = 0; // physical
-    private int lowChunk = 0; // virtual
-    private int highChunk = 1; // virtual
-    private int allocSize; // allocated size of openAuctions array
-    private OpenAuction[] openAuctions;
-    private Random random = new Random(18394);
+    private final ThreadLocalRandom random;
     private final SimpleCalendar calendar;
 
-    OpenAuctions(SimpleCalendar calendar) {
-        this.allocSize = 3000;
-        this.openAuctions = new OpenAuction[allocSize];
+    OpenAuctions(SimpleCalendar calendar, ThreadLocalRandom random) {
         this.calendar = calendar;
+        this.random = random;
     }
 
-    // creates the open auction instance as well as returning the new id
-    synchronized public int getNewId() {
-        // don't bother to reuse the open auction objects - uugh, need to do this fast KT
-        checkSpace(); // check to see if openAuctions needs to be expanded
-
-        // as seen by outside world, id is always increasing and is id
-        // of virtual array, real array may be shorter
-        assert !(currPhysId + offset == Integer.MAX_VALUE) :
-                "KT: virtual Id is going to overflow - drats!!!";
-        int virtualId = currPhysId + offset;
-        OpenAuction newItem = new OpenAuction(calendar, virtualId, random);
-        openAuctions[currPhysId] = newItem;
-        currPhysId++;
-        if (virtualId == highChunk * ITEM_DISTRIBUTION_SIZE) {
-            highChunk++;
-        }
-        return virtualId;
+    public long createNewAuction() {
+        long auctionId = AUCTION_IDS.getAndIncrement();
+        OpenAuction newAuction = new OpenAuction(calendar, auctionId, random);
+        OPEN_AUCTIONS.put(auctionId, newAuction);
+        return auctionId;
     }
 
-    synchronized public int getExistingId() {  // used by generateBid
-        int id;
-        do {
-            // generates an id between 0 and ITEM_DISTRIBUTION_SIZE
-            id = random.nextInt(ITEM_DISTRIBUTION_SIZE);
-
-            // convert to offset somewhere in physical array 
-            // which may be bigger than
-            id += getRandomChunkOffset();
-
-            // is closed checks to see if auction should be closed and closes
-            // it if necessary
-        } while (id >= currPhysId || openAuctions[id].isClosed(calendar));
-        openAuctions[id].recordBid();
-        return id + offset; // return virtual id
+    public long getExistingId() {
+        return random.nextLong(AUCTION_IDS.get());
     }
 
-    public int increasePrice(int id) {
-        return openAuctions[id - offset].increasePrice();
+    public synchronized int increasePrice(long id) {
+        return OPEN_AUCTIONS.get(id).increasePrice();
     }
 
-    public long getEndTime(int id) {
-        return openAuctions[id - offset].getEndTime();
+    public long getEndTime(long id) {
+        return OPEN_AUCTIONS.get(id).getEndTime();
     }
 
-    public int getCurrPrice(int id) {
-        return openAuctions[id - offset].getCurrPrice();
-    }
-
-    private void checkSpace() {
-        // first try to get space by shrinking,
-        // if there isn't enough to shrink, then we have to expand
-        if (currPhysId == allocSize) {
-            shrink();
-            if (currPhysId == allocSize) {
-                expand();
-            }
-        }
-    }
-
-    private void shrink() {
-        // only shrink if I can make a lot of space
-        if (numSeqClosed >= 500) {
-            System.out.println("KT: Shrinking open auctions");
-            System.arraycopy(openAuctions, numSeqClosed, openAuctions, 0, allocSize - numSeqClosed);
-            offset += numSeqClosed;
-            currPhysId -= numSeqClosed;
-            numSeqClosed = 0;
-            while (offset >= (lowChunk + 1) * ITEM_DISTRIBUTION_SIZE)
-                lowChunk++;
-        }
-    }
-
-    private void expand() {
-        int oldSize = allocSize;
-        allocSize = allocSize * 2;
-        OpenAuction[] newArray = new OpenAuction[allocSize];
-        // might as well shrink what we can as long as we are already copying
-        System.arraycopy(openAuctions, numSeqClosed, newArray, 0, oldSize - numSeqClosed);
-        offset += numSeqClosed;    //
-        currPhysId -= numSeqClosed;
-        numSeqClosed = 0;
-        openAuctions = newArray;
-        while (offset >= (lowChunk + 1) * ITEM_DISTRIBUTION_SIZE)
-            lowChunk++;
-    }
-
-    private int getRandomChunkOffset() {
-        int chunkId = random.nextInt(highChunk - lowChunk) + lowChunk;
-        // chunks are maintained relative to virtual array, so need to subtract
-        // offset to get a physical offset
-        return (chunkId * ITEM_DISTRIBUTION_SIZE) - offset;
+    public synchronized int getCurrPrice(long id) {
+        return OPEN_AUCTIONS.get(id).getCurrPrice();
     }
 }
 

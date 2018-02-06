@@ -42,26 +42,24 @@ class OpenAuction {
     private static final int MAX_AUCTION_LENGTH_SEC = 24 * 60 * 60; // 24 hours
     private static final int MIN_AUCTION_LENGTH_SEC = 2 * 60 * 60; // 2 hours
 
-    private int currPrice; // price in dollars
+    private int currPrice;
     private boolean closed = false;
     private long endTime;
     private int numBids = 0; // for debugging purposes
     private Random random;
 
-    OpenAuction(SimpleCalendar cal, int itemId, Random random) {
-        currPrice = random.nextInt(200) + 1; // initial price must be at least $1
+    OpenAuction(SimpleCalendar cal, long itemId, Random random) {
+        currPrice = random.nextInt(200) + 1;
         endTime = cal.getTimeInSecs() + random.nextInt(MAX_AUCTION_LENGTH_SEC) + MIN_AUCTION_LENGTH_SEC;
         this.random = random;
     }
 
-    // increase the price, return the new bid amount
     public int increasePrice() {
         int increase = random.nextInt(25) + 1; // zero increases not allowed
         currPrice += increase;
         return currPrice;
     }
 
-    // curr price is always an even dollar amount
     public int getCurrPrice() {
         return currPrice;
     }

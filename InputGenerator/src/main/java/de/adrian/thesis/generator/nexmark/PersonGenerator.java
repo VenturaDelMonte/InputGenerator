@@ -36,6 +36,7 @@ import de.adrian.thesis.generator.nexmark.data.*;
 import java.nio.CharBuffer;
 import java.util.Random;
 import java.util.Vector;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Generates a person object to be send for the Nexmark Benchmark.
@@ -45,7 +46,15 @@ public class PersonGenerator {
     public static int NUM_CATEGORIES = 1000;
 
     // Currently generate the same person data every time
-    private final Random random = new Random(20934);
+    private Random random;
+
+    PersonGenerator() {
+        this.random = new Random(12343234);
+    }
+
+    PersonGenerator(ThreadLocalRandom random) {
+        this.random = random;
+    }
 
     class Profile {
         public Vector<String> interests = new Vector<>();
