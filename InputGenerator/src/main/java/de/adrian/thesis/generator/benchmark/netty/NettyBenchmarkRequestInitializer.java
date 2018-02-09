@@ -49,7 +49,6 @@ public class NettyBenchmarkRequestInitializer<T> extends ChannelInitializer<Sock
     private static final Logger LOG = LogManager.getLogger(NettyBenchmarkRequestInitializer.class);
 
     private static final StringDecoder DECODER = new StringDecoder();
-    private static final StringEncoder ENCODER = new StringEncoder();
 
     private static final int MAX_FRAME_LENGTH = 8092;
 

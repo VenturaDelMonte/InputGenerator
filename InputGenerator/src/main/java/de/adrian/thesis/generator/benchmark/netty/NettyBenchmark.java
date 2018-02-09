@@ -57,6 +57,9 @@ public final class NettyBenchmark extends Benchmark {
     @Parameter(names = {"-seed", "--yahooSeed"}, description = "Sets seed for the yahoo generator")
     private int yahooSeed = 1337;
 
+    @Parameter(names = {"-yN", "--yahooGeneratorName"}, description = "Sets the generator for the yahoo benchmark")
+    private String yahooGeneratorName = "independent";
+
     private NettyBenchmark(String[] args) {
         super(args);
     }
@@ -74,6 +77,7 @@ public final class NettyBenchmark extends Benchmark {
         NettyPersonCreatorThread.WAIT_DURATION = personDelay;
         NettyYahooCreatorThread.WAITING_TIME = yahooDelay;
         NettyYahooCreatorThread.INITIAL_SEED = yahooSeed;
+        NettyYahooCreatorThread.GENERATOR_NAME = yahooGeneratorName;
 
         AbstractNettyCreatorThread.AbstractNettyCreatorThreadProperties creatorProperties =
                 new AbstractNettyCreatorThread.AbstractNettyCreatorThreadProperties(getCreatorProperties());

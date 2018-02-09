@@ -8,22 +8,19 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-public class YahooGenerator {
+/**
+ * This generator for the Yahoo-Streaming benchmark generates pairs of AD_ID to CAMPAIGN_ID in advance.
+ * May be costly, when generating more that 10 million events.
+ * Flink source needs to generate this mapping as well.
+ */
+public class YahooMatchingUUIDGenerator extends YahooBenchmarkGenerator {
 
-    private static final String DUMMY_UUID = UUID.randomUUID().toString();
-    private static final String IP_ADDRESS = "255.255.255.255";
-
-    private static final int AD_TYPE_LENGTH = Constants.AD_TYPES.size();
-    private static final int EVENT_TYPE_LENGTH = Constants.EVENT_TYPES.size();
     private static final int NUMBER_OF_ADS_PER_CAMPAIGN = 10;
 
     private final StringBuilder stringBuilder = new StringBuilder(100);
 
     private final CampaignAd[] campaingsArray;
     private final int campaignLength;
-
-    private int campainLengthCounter = 0, adTypeCounter = 0, eventTypeCounter = 0, timestampCounter = 0;
-    private long timestamp = System.currentTimeMillis();
 
     private static List<CampaignAd> GenerateCampaignMapping(long numCampaigns, long seed) {
 
@@ -47,21 +44,22 @@ public class YahooGenerator {
         return campaignAds;
     }
 
-    public YahooGenerator(long numberOfCampaigns, long seed) {
+    public YahooMatchingUUIDGenerator(long numberOfCampaigns, long seed) {
         List<CampaignAd> campaignAds = GenerateCampaignMapping(numberOfCampaigns, seed);
 
         this.campaingsArray = campaignAds.toArray(new CampaignAd[campaignAds.size()]);
         this.campaignLength = this.campaingsArray.length;
     }
 
+    @Override
     public String getNext() {
-        campainLengthCounter += 1;
+        campaignLengthCounter += 1;
         adTypeCounter += 1;
         eventTypeCounter += 1;
         timestampCounter += 1;
 
-        if (campainLengthCounter >= campaignLength) {
-            campainLengthCounter = 0;
+        if (campaignLengthCounter >= campaignLength) {
+            campaignLengthCounter = 0;
         }
 
         if (adTypeCounter >= AD_TYPE_LENGTH) {
@@ -77,7 +75,7 @@ public class YahooGenerator {
             timestamp = System.currentTimeMillis();
         }
 
-        String adId = campaingsArray[campainLengthCounter].adId;
+        String adId = campaingsArray[campaignLengthCounter].adId;
         String adType = Constants.AD_TYPES.get(adTypeCounter);
         String eventType = Constants.EVENT_TYPES.get(eventTypeCounter);
 

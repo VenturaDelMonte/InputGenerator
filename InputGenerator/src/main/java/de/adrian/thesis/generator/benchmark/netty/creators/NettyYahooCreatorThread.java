@@ -1,6 +1,8 @@
 package de.adrian.thesis.generator.benchmark.netty.creators;
 
-import de.adrian.thesis.generator.yahoo.YahooGenerator;
+import de.adrian.thesis.generator.yahoo.YahooBenchmarkGenerator;
+import de.adrian.thesis.generator.yahoo.YahooIndependentGenerator;
+import de.adrian.thesis.generator.yahoo.YahooMatchingUUIDGenerator;
 
 import java.util.Queue;
 
@@ -12,16 +14,23 @@ public class NettyYahooCreatorThread extends AbstractNettyCreatorThread {
 
     public static long INITIAL_SEED;
 
-    private final YahooGenerator yahooGenerator;
+    public static String GENERATOR_NAME;
+
+    private final YahooBenchmarkGenerator yahooBenchmarkGenerator;
 
     public NettyYahooCreatorThread(Queue<String> queue, AbstractNettyCreatorThreadProperties properties) {
         super(THREAD_NAME, queue, properties);
-        this.yahooGenerator = new YahooGenerator(properties.maxNumbers / 10, INITIAL_SEED);
+        if (GENERATOR_NAME.toLowerCase().contains("independent")) {
+            this.yahooBenchmarkGenerator = new YahooIndependentGenerator();
+        } else {
+            this.yahooBenchmarkGenerator =
+                    new YahooMatchingUUIDGenerator(properties.maxNumbers / 10, INITIAL_SEED);
+        }
     }
 
     @Override
     String generateRecord() {
-        return yahooGenerator.getNext();
+        return yahooBenchmarkGenerator.getNext();
     }
 
     @Override
