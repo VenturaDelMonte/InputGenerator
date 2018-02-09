@@ -1,6 +1,7 @@
 package de.adrian.thesis.generator.benchmark.netty.creators;
 
 import de.adrian.thesis.generator.benchmark.netty.creators.AbstractNettyCreatorThread;
+import de.adrian.thesis.generator.nexmark.NexmarkStreamGenerator;
 
 import java.util.Queue;
 
@@ -13,8 +14,11 @@ public class NettyAuctionCreatorThread extends AbstractNettyCreatorThread {
 
     public static long WAIT_DURATION = 10;
 
+    private final NexmarkStreamGenerator nexmarkGenerator;
+
     public NettyAuctionCreatorThread(Queue<String> queue, AbstractNettyCreatorThreadProperties properties) {
         super(THREAD_NAME, queue, properties);
+        this.nexmarkGenerator = new NexmarkStreamGenerator();
     }
 
     @Override

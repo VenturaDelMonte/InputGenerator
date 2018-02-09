@@ -22,6 +22,7 @@ import de.adrian.thesis.generator.benchmark.javaio.ForwardingThread;
 import de.adrian.thesis.generator.benchmark.netty.creators.AbstractNettyCreatorThread;
 import de.adrian.thesis.generator.benchmark.netty.creators.NettyAuctionCreatorThread;
 import de.adrian.thesis.generator.benchmark.netty.creators.NettyPersonCreatorThread;
+import de.adrian.thesis.generator.benchmark.netty.creators.NettyYahooCreatorThread;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.EpollEventLoopGroup;
@@ -50,6 +51,12 @@ public final class NettyBenchmark extends Benchmark {
     @Parameter(names = {"-pD", "--personDelay"}, description = "Sets delay, which the person creator thread should wait")
     private int personDelay = 100;
 
+    @Parameter(names = {"-yD", "--yahooDelay"}, description = "Sets delay, which the yahoo creator thread should wait")
+    private int yahooDelay = 3;
+
+    @Parameter(names = {"-seed", "--yahooSeed"}, description = "Sets seed for the yahoo generator")
+    private int yahooSeed = 1337;
+
     private NettyBenchmark(String[] args) {
         super(args);
     }
@@ -65,6 +72,8 @@ public final class NettyBenchmark extends Benchmark {
 
         NettyAuctionCreatorThread.WAIT_DURATION = auctionDelay;
         NettyPersonCreatorThread.WAIT_DURATION = personDelay;
+        NettyYahooCreatorThread.WAITING_TIME = yahooDelay;
+        NettyYahooCreatorThread.INITIAL_SEED = yahooSeed;
 
         AbstractNettyCreatorThread.AbstractNettyCreatorThreadProperties creatorProperties =
                 new AbstractNettyCreatorThread.AbstractNettyCreatorThreadProperties(getCreatorProperties());

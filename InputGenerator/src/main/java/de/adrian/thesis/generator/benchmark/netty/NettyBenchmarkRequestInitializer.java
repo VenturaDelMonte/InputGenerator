@@ -20,6 +20,7 @@ import de.adrian.thesis.generator.benchmark.javaio.ForwardingThread;
 import de.adrian.thesis.generator.benchmark.netty.creators.AbstractNettyCreatorThread;
 import de.adrian.thesis.generator.benchmark.netty.creators.NettyAuctionCreatorThread;
 import de.adrian.thesis.generator.benchmark.netty.creators.NettyPersonCreatorThread;
+import de.adrian.thesis.generator.benchmark.netty.creators.NettyYahooCreatorThread;
 import de.adrian.thesis.generator.benchmark.recordcreator.RecordCreator;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -98,7 +99,16 @@ public class NettyBenchmarkRequestInitializer<T> extends ChannelInitializer<Sock
         NettyStringForwardingThread auctionForwardingThread =
                 new NettyStringForwardingThread(channel, auctions, auctionCreatorThread, forwardingProperties, instanceName);
 
-        pipeline.addLast(new NettyBenchmarkRequestHandler(forwardingThread, personForwardingThread, auctionForwardingThread));
+        BlockingQueue<String> ads = new LinkedBlockingQueue<>();
+        NettyYahooCreatorThread yahooThread = new NettyYahooCreatorThread(ads, creatorProperties);
+        NettyStringForwardingThread yahooForwardingThread =
+                new NettyStringForwardingThread(channel, ads, yahooThread, forwardingProperties, instanceName);
+
+        pipeline.addLast(new NettyBenchmarkRequestHandler(
+                forwardingThread,
+                personForwardingThread,
+                auctionForwardingThread,
+                yahooForwardingThread));
     }
 }
 

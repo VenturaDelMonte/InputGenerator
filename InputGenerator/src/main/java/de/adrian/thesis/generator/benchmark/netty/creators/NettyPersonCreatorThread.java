@@ -16,8 +16,11 @@ public class NettyPersonCreatorThread extends AbstractNettyCreatorThread {
 
     public static long WAIT_DURATION = 100;
 
+    private final NexmarkStreamGenerator nexmarkGenerator;
+
     public NettyPersonCreatorThread(Queue<String> queue, AbstractNettyCreatorThreadProperties properties) {
         super(THREAD_NAME, queue, properties);
+        this.nexmarkGenerator = new NexmarkStreamGenerator();
     }
 
     @Override

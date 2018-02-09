@@ -14,7 +14,6 @@ public abstract class AbstractNettyCreatorThread extends Thread {
 
     private static final Logger LOG = LogManager.getLogger(AbstractNettyCreatorThread.class);
 
-    final NexmarkStreamGenerator nexmarkGenerator;
     private final Queue<String> queue;
     private final AbstractNettyCreatorThreadProperties properties;
 
@@ -24,7 +23,6 @@ public abstract class AbstractNettyCreatorThread extends Thread {
         super(threadName);
         this.queue = queue;
         this.properties = properties;
-        this.nexmarkGenerator = new NexmarkStreamGenerator();
     }
 
     @Override
