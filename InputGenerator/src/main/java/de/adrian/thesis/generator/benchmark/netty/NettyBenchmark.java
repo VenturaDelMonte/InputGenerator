@@ -25,10 +25,13 @@ import de.adrian.thesis.generator.benchmark.netty.creators.NettyPersonCreatorThr
 import de.adrian.thesis.generator.benchmark.netty.creators.NettyYahooCreatorThread;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -85,14 +88,16 @@ public final class NettyBenchmark extends Benchmark {
 
         ForwardingThread.ForwardingThreadProperties forwardingProperties = getForwardingProperties();
 
-        EventLoopGroup bossGroup = new EpollEventLoopGroup(1);
-        EventLoopGroup workerGroup = new EpollEventLoopGroup(4);
+        boolean useEpoll = Epoll.isAvailable();
+
+        EventLoopGroup bossGroup = useEpoll ? new EpollEventLoopGroup(1) : new NioEventLoopGroup(1);
+        EventLoopGroup workerGroup = useEpoll ? new EpollEventLoopGroup(4) : new NioEventLoopGroup(4);
 
         try {
 
             ServerBootstrap server = new ServerBootstrap();
             server.group(bossGroup, workerGroup)
-                    .channel(EpollServerSocketChannel.class)
+                    .channel(useEpoll ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
                     .handler(new NettyBenchmarkServerInitializer(forwardingProperties.serverTimeout))
                     .childHandler(new NettyBenchmarkRequestInitializer(recordCreator, creatorProperties, forwardingProperties));
 
