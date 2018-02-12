@@ -51,8 +51,10 @@ public class NettyCreatorThread<T> extends Thread {
             return;
         }
 
+        T record;
+
         for (long counter = startingNumber; counter < properties.maxNumbers && !interrupted; counter++) {
-            T record = recordCreator.createRecord(counter);
+            record = recordCreator.createRecord(counter);
             queue.add(record);
 
             if (properties.logMessages && counter % properties.logMessagesModulo == 0) {

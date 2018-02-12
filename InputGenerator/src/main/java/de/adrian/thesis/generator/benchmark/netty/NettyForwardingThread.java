@@ -10,6 +10,7 @@ import io.netty.channel.socket.SocketChannel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -21,7 +22,7 @@ public class NettyForwardingThread<T> extends Thread {
 
     private static final String THREAD_NAME = "NettyForwardingThread";
 
-    private static final int WAITING_TIMEOUT = 100;
+    private static final int WAITING_TIMEOUT = 10000;
 
     private final BlockingQueue<T> queue;
     private final NettyCreatorThread<T> producerThread;
@@ -50,11 +51,14 @@ public class NettyForwardingThread<T> extends Thread {
     public void run() {
         try {
 
+            T record;
+
             while (!interrupted && channel.isActive()) {
 
-                T record = queue.poll(WAITING_TIMEOUT, TimeUnit.MILLISECONDS);
+                record = queue.poll(WAITING_TIMEOUT, TimeUnit.MILLISECONDS);
 
                 if (record == null) {
+                    LOG.error("NettyForwardingThread waited more than {} for new record. Shutting down", WAITING_TIMEOUT);
                     break;
                 }
 

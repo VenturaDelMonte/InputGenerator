@@ -24,12 +24,14 @@ public class ThroughputLoggingThread extends Thread {
     @Override
     public void run() {
 
+        long currentTime;
+
         while (true) {
             try {
                 Thread.sleep(1000);
 
                 // TODO Or use System.nanoTime()? Measure computational overhead
-                long currentTime = System.currentTimeMillis();
+                currentTime = System.currentTimeMillis();
 
                 LOG.info(THROUGHPUT_MARKER, "{},{},{}", instanceName, throughputCount, currentTime);
                 throughputCount.set(0);

@@ -19,7 +19,7 @@ public class NettyStringForwardingThread extends Thread {
 
     private static final String THREAD_NAME = "NettyStringForwardingThread";
 
-    private static final int WAITING_TIMEOUT = 1000;
+    private static final int WAITING_TIMEOUT = 10000;
 
     private final BlockingQueue<String> queue;
     private final AbstractNettyCreatorThread producerThread;
@@ -50,11 +50,14 @@ public class NettyStringForwardingThread extends Thread {
     public void run() {
         try {
 
+            String record;
+
             while (!interrupted && channel.isActive()) {
 
-                String record = queue.poll(WAITING_TIMEOUT, TimeUnit.MILLISECONDS);
+                record = queue.poll(WAITING_TIMEOUT, TimeUnit.MILLISECONDS);
 
                 if (record == null) {
+                    LOG.error("NettyForwardingThread waited more than {} for new record. Shutting down", WAITING_TIMEOUT);
                     break;
                 }
 
