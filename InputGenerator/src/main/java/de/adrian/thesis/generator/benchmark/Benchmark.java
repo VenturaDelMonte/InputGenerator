@@ -13,6 +13,8 @@ import org.apache.logging.log4j.core.LoggerContext;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,8 +61,17 @@ public abstract class Benchmark<T> {
 
     public Benchmark(String[] args) {
         parseCLI(args);
+        addHostnameToInstanceName();
         reconfigureLoggerForDynamicFilename();
         recordCreator = chooseRecordCreator(recordCreatorName);
+    }
+
+    private void addHostnameToInstanceName() {
+        try {
+            name = name + "@" + InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            name = name + "@" + "UnkownHost";
+        }
     }
 
     public abstract void startGenerator();
