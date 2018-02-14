@@ -19,10 +19,7 @@ package de.adrian.thesis.generator.benchmark.netty;
 import com.beust.jcommander.Parameter;
 import de.adrian.thesis.generator.benchmark.Benchmark;
 import de.adrian.thesis.generator.benchmark.javaio.ForwardingThread;
-import de.adrian.thesis.generator.benchmark.netty.creators.AbstractNettyCreatorThread;
-import de.adrian.thesis.generator.benchmark.netty.creators.NettyAuctionCreatorThread;
-import de.adrian.thesis.generator.benchmark.netty.creators.NettyPersonCreatorThread;
-import de.adrian.thesis.generator.benchmark.netty.creators.NettyYahooCreatorThread;
+import de.adrian.thesis.generator.benchmark.netty.creators.*;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.Epoll;
@@ -80,6 +77,7 @@ public final class NettyBenchmark extends Benchmark {
                 "yahooDelay: {}, yahooGeneratorName: {}, port: {}, name: {}, timeout: {}",
                 maxNumberOfMessages, initialPersons, auctionDelay, personDelay, yahooDelay, yahooGeneratorName, port, name, serverTimeout);
 
+        NettyStringCreatorThread.WAITING_DURATION = msDelay;
         NettyAuctionCreatorThread.WAIT_DURATION = auctionDelay;
         NettyPersonCreatorThread.WAIT_DURATION = personDelay;
         NettyYahooCreatorThread.WAITING_TIME = yahooDelay;

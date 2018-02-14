@@ -37,7 +37,7 @@ public abstract class Benchmark<T> {
     private String recordCreatorName = "timestamp";
 
     @Parameter(names = {"-d", "--delay"}, description = "Delay between between insertions of new elements to queue")
-    private int msDelay = 50;
+    protected int msDelay = 50;
 
     @Parameter(names = {"-m", "--maxMessages"}, description = "Max number of messages, that should be sent")
     protected int maxNumberOfMessages = 500;
