@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * Generates person instances as csv for the Nexmark benchmark.
@@ -18,13 +19,13 @@ public class NettyPersonCreatorThread extends AbstractNettyCreatorThread {
 
     private final NexmarkStreamGenerator nexmarkGenerator;
 
-    public NettyPersonCreatorThread(Queue<String> queue, AbstractNettyCreatorThreadProperties properties) {
-        super(THREAD_NAME, queue, properties);
+    public NettyPersonCreatorThread(AbstractNettyCreatorThreadProperties properties) {
+        super(THREAD_NAME, properties);
         this.nexmarkGenerator = new NexmarkStreamGenerator();
     }
 
     @Override
-    String generateRecord() {
+    String generateRecord(long currentNumber) {
         return nexmarkGenerator.generatePerson();
     }
 

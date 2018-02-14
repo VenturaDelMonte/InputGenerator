@@ -2,10 +2,8 @@ package de.adrian.thesis.generator.benchmark.netty;
 
 
 import de.adrian.thesis.generator.benchmark.javaio.ForwardingThread;
-import de.adrian.thesis.generator.benchmark.javaio.ThroughputLoggingThread;
-import de.adrian.thesis.generator.benchmark.netty.creators.AbstractNettyCreatorThread;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.socket.SocketChannel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,33 +15,25 @@ public class NettyStringForwardingThread extends Thread {
 
     private static final Logger LOG = LogManager.getLogger(NettyStringForwardingThread.class);
 
-    private static final String THREAD_NAME = "NettyStringForwardingThread";
+    private static final String THREAD_NAME = "NettyForwardingThread";
 
     private static final int WAITING_TIMEOUT = 10000;
 
-    private final BlockingQueue<String> queue;
-    private final AbstractNettyCreatorThread producerThread;
-    private final ThroughputLoggingThread loggingThread;
     private final AtomicLong currentRecords = new AtomicLong();
-    private final SocketChannel channel;
+    private final Channel channel;
+    private final BlockingQueue<String> queue;
+    private final int forwardingId;
     private final ForwardingThread.ForwardingThreadProperties forwardingProperties;
 
     private volatile boolean interrupted = false;
-    private long sendRecords;
+    private long sentRecords;
 
-    NettyStringForwardingThread(SocketChannel channel,
-                                BlockingQueue<String> queue,
-                                AbstractNettyCreatorThread creatorThread,
-                                ForwardingThread.ForwardingThreadProperties forwardingProperties,
-                                String name) {
+    NettyStringForwardingThread(Channel channel, BlockingQueue<String> queue, int sourceID, ForwardingThread.ForwardingThreadProperties forwardingProperties) {
         super(THREAD_NAME);
         this.channel = channel;
-        this.forwardingProperties = forwardingProperties;
         this.queue = queue;
-        this.producerThread = creatorThread;
-        this.loggingThread = new ThroughputLoggingThread(
-                currentRecords,
-                name + "-" + creatorThread.getShortDescription());
+        this.forwardingId = sourceID;
+        this.forwardingProperties = forwardingProperties;
     }
 
     @Override
@@ -63,38 +53,28 @@ public class NettyStringForwardingThread extends Thread {
 
                 channel.writeAndFlush(record);
 
-                if (forwardingProperties.logMessages && sendRecords++ % forwardingProperties.logMessagesModulo == 0) {
+                if (forwardingProperties.logMessages && sentRecords++ % forwardingProperties.logMessagesModulo == 0) {
                     LOG.info("NettyForwardingThread consumed '{}'", record);
                 }
 
-                sendRecords++;
+                sentRecords++;
                 currentRecords.incrementAndGet();
             }
         } catch (InterruptedException exception) {
             LOG.error("NettyForwardingThread was interrupted");
         }
 
-        try {
-            close();
-        } catch (InterruptedException e) {
-            LOG.error("NettyForwardingThread was interrupted while finishing");
-        }
+        close();
     }
 
-    void stopConsuming() throws InterruptedException {
+    void stopConsuming() {
         this.interrupt();
         interrupted = true;
 
         close();
     }
 
-    private void close() throws InterruptedException {
-        loggingThread.interrupt();
-        producerThread.stopProducing();
-
-        loggingThread.join();
-        producerThread.join();
-
+    private void close() {
         if (!channel.close().isDone()) {
             channel.close().addListener((ChannelFutureListener) future -> {
                 if (future.isSuccess()) {
@@ -106,14 +86,11 @@ public class NettyStringForwardingThread extends Thread {
         }
     }
 
-    public void startConsuming() {
+    public AtomicLong getCurrentRecords() {
+        return currentRecords;
+    }
 
-        if (producerThread.isAlive()) {
-            return;
-        }
-
-        producerThread.start();
-        loggingThread.start();
-        this.start();
+    public int getForwardingId() {
+        return forwardingId;
     }
 }

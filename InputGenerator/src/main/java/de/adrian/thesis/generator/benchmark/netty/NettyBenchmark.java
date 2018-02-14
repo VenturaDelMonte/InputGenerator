@@ -76,6 +76,10 @@ public final class NettyBenchmark extends Benchmark {
     @Override
     public void startGenerator() {
 
+        LOG.info("Starting NettyBenchmark with maxMessages: {}, initialPersons: {}, auctionDelay: {}, personDelay: {}, " +
+                "yahooDelay: {}, yahooGeneratorName: {}, port: {}, name: {}, timeout: {}",
+                maxNumberOfMessages, initialPersons, auctionDelay, personDelay, yahooDelay, yahooGeneratorName, port, name, serverTimeout);
+
         NettyAuctionCreatorThread.WAIT_DURATION = auctionDelay;
         NettyPersonCreatorThread.WAIT_DURATION = personDelay;
         NettyYahooCreatorThread.WAITING_TIME = yahooDelay;

@@ -15,8 +15,8 @@ public class SocketBenchmark extends Benchmark implements SocketBenchmarkCallbac
 
     private static final Logger LOG = LogManager.getLogger(SocketBenchmark.class);
 
-    private CreatorThread<String> creatorThread;
-    private ForwardingThread<String> forwardingThread;
+    private CreatorThread creatorThread;
+    private ForwardingThread forwardingThread;
     private boolean interrupted = false;
 
     private boolean clientWillReconnect = false;
@@ -45,8 +45,8 @@ public class SocketBenchmark extends Benchmark implements SocketBenchmarkCallbac
             clientWillReconnect = false;
             interrupted = false;
 
-            creatorThread = new CreatorThread<String>(this, queue, recordCreator, creatorProperties);
-            forwardingThread = new ForwardingThread<>(this, queue, creatorThread, forwardingProperties);
+            creatorThread = new CreatorThread(this, queue, recordCreator, creatorProperties);
+            forwardingThread = new ForwardingThread(this, queue, creatorThread, forwardingProperties);
 
             forwardingThread.start();
 

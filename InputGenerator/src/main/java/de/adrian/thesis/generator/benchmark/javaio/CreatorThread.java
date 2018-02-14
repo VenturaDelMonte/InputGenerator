@@ -1,27 +1,27 @@
 package de.adrian.thesis.generator.benchmark.javaio;
 
-import de.adrian.thesis.generator.benchmark.recordcreator.RecordCreator;
+import de.adrian.thesis.generator.benchmark.netty.creators.recordcreator.RecordCreator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Queue;
 
-public class CreatorThread<T> extends Thread {
+public class CreatorThread extends Thread {
 
     private static final Logger LOG = LogManager.getLogger(CreatorThread.class);
 
     private final static String THREAD_NAME = "CreatorThread";
 
-    private final Queue<T> queue;
-    private final RecordCreator<T> recordCreator;
+    private final Queue<String> queue;
+    private final RecordCreator recordCreator;
     private final CreateThreadProperties properties;
     private final SocketBenchmarkCallback finisher;
     private long startingNumber = 0;
     private volatile boolean interrupted = false;
 
     CreatorThread(SocketBenchmarkCallback finisher,
-                  Queue<T> queue,
-                  RecordCreator<T> recordCreator,
+                  Queue<String> queue,
+                  RecordCreator recordCreator,
                   CreateThreadProperties properties) {
         super(THREAD_NAME);
         this.finisher = finisher;
@@ -43,7 +43,7 @@ public class CreatorThread<T> extends Thread {
         }
 
         for (long counter = startingNumber; counter < properties.maxNumbers && !interrupted; counter++) {
-            T record = recordCreator.createRecord(counter);
+            String record = recordCreator.createRecord(counter);
             queue.add(record);
 
             if (properties.logMessages && counter % properties.logMessagesModulo == 0) {

@@ -4,9 +4,9 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import de.adrian.thesis.generator.benchmark.javaio.CreatorThread;
 import de.adrian.thesis.generator.benchmark.javaio.ForwardingThread;
-import de.adrian.thesis.generator.benchmark.recordcreator.CountingRecordCreator;
-import de.adrian.thesis.generator.benchmark.recordcreator.CountingTimestampRecordCreator;
-import de.adrian.thesis.generator.benchmark.recordcreator.RecordCreator;
+import de.adrian.thesis.generator.benchmark.netty.creators.recordcreator.CountingRecordCreator;
+import de.adrian.thesis.generator.benchmark.netty.creators.recordcreator.CountingTimestampRecordCreator;
+import de.adrian.thesis.generator.benchmark.netty.creators.recordcreator.RecordCreator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -52,12 +52,12 @@ public abstract class Benchmark<T> {
     private boolean throughput = true;
 
     @Parameter(names = {"-n", "--name"}, description = "Assigns name to this producing instance. Useful for logging throughput.")
-    private String name = "DefaultInstance";
+    protected String name = "DefaultInstance";
 
     @Parameter(names = {"-st", "--serverTimeout"}, description = "Timeout after which the netty server will shutdown, if no new client has connected and no client is active")
-    private int serverTimeout = 120;
+    protected int serverTimeout = 120;
 
-    protected RecordCreator<T> recordCreator;
+    protected RecordCreator recordCreator;
 
     public Benchmark(String[] args) {
         parseCLI(args);
@@ -88,8 +88,8 @@ public abstract class Benchmark<T> {
                 .parse(args);
     }
 
-    private RecordCreator<T> chooseRecordCreator(String name) {
-        RecordCreator<T> recordCreator = GENERATORS.get(name);
+    private RecordCreator chooseRecordCreator(String name) {
+        RecordCreator recordCreator = GENERATORS.get(name);
 
         if (recordCreator == null) {
             LOG.error("Generator '{}' could not be found", name);

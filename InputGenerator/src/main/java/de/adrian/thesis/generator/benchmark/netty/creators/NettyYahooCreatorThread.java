@@ -18,8 +18,8 @@ public class NettyYahooCreatorThread extends AbstractNettyCreatorThread {
 
     private final YahooBenchmarkGenerator yahooBenchmarkGenerator;
 
-    public NettyYahooCreatorThread(Queue<String> queue, AbstractNettyCreatorThreadProperties properties) {
-        super(THREAD_NAME, queue, properties);
+    public NettyYahooCreatorThread(AbstractNettyCreatorThreadProperties properties) {
+        super(THREAD_NAME, properties);
         if (GENERATOR_NAME.toLowerCase().contains("independent")) {
             this.yahooBenchmarkGenerator = new YahooIndependentGenerator();
         } else {
@@ -29,7 +29,7 @@ public class NettyYahooCreatorThread extends AbstractNettyCreatorThread {
     }
 
     @Override
-    String generateRecord() {
+    String generateRecord(long currentNumber) {
         return yahooBenchmarkGenerator.getNext();
     }
 

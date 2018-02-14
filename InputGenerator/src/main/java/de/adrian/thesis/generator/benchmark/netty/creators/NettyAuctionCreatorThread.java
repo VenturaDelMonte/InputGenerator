@@ -16,13 +16,13 @@ public class NettyAuctionCreatorThread extends AbstractNettyCreatorThread {
 
     private final NexmarkStreamGenerator nexmarkGenerator;
 
-    public NettyAuctionCreatorThread(Queue<String> queue, AbstractNettyCreatorThreadProperties properties) {
-        super(THREAD_NAME, queue, properties);
+    public NettyAuctionCreatorThread(AbstractNettyCreatorThreadProperties properties) {
+        super(THREAD_NAME, properties);
         this.nexmarkGenerator = new NexmarkStreamGenerator();
     }
 
     @Override
-    String generateRecord() {
+    String generateRecord(long currentNumber) {
         return nexmarkGenerator.generateAuction();
     }
 

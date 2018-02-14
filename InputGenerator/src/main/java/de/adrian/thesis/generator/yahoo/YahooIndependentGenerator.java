@@ -33,6 +33,7 @@ public class YahooIndependentGenerator extends YahooBenchmarkGenerator {
             eventTypeCounter = 0;
         }
 
+        // TODO Check if feasible
         if (timestampCounter >= 1000) {
             timestampCounter = 0;
             timestamp = System.currentTimeMillis();
@@ -41,6 +42,7 @@ public class YahooIndependentGenerator extends YahooBenchmarkGenerator {
         String adType = Constants.AD_TYPES.get(adTypeCounter);
         String eventType = Constants.EVENT_TYPES.get(eventTypeCounter);
 
+        // ID, randomUser, randomPage, AdId, AdType, AdEvent, Timestamp, IpAddress
         stringBuilder.setLength(0);
         return stringBuilder
                 .append(ADVERTISING_ID.getAndIncrement())

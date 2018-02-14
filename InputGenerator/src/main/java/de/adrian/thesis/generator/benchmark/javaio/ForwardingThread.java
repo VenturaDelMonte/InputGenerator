@@ -14,7 +14,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class ForwardingThread<T> extends Thread {
+public class ForwardingThread extends Thread {
 
     private static final Logger LOG = LogManager.getLogger(ForwardingThread.class);
 
@@ -22,10 +22,10 @@ public class ForwardingThread<T> extends Thread {
 
     private static final int WAITING_TIMEOUT = 100;
 
-    private final BlockingQueue<T> queue;
+    private final BlockingQueue<String> queue;
     private final SocketBenchmarkCallback applicationCallback;
     private final ForwardingThreadProperties properties;
-    private final CreatorThread<T> producerThread;
+    private final CreatorThread producerThread;
     private final AtomicLong currentRecords = new AtomicLong();
     private final ThroughputLoggingThread loggingThread;
 
@@ -33,7 +33,7 @@ public class ForwardingThread<T> extends Thread {
     private long totalRecords;
     private ServerSocket socket;
 
-    ForwardingThread(SocketBenchmarkCallback applicationCallback, BlockingQueue<T> queue, CreatorThread<T> producerThread, ForwardingThreadProperties properties) {
+    ForwardingThread(SocketBenchmarkCallback applicationCallback, BlockingQueue<String> queue, CreatorThread producerThread, ForwardingThreadProperties properties) {
         super(THREAD_NAME);
         this.applicationCallback = applicationCallback;
         this.queue = queue;
@@ -70,7 +70,7 @@ public class ForwardingThread<T> extends Thread {
 
                     while (!interrupted && !outputStream.checkError()) {
 
-                        T record = queue.poll(WAITING_TIMEOUT, TimeUnit.MILLISECONDS);
+                        String record = queue.poll(WAITING_TIMEOUT, TimeUnit.MILLISECONDS);
 
                         if (record == null) {
                             break;

@@ -1,11 +1,14 @@
 package de.adrian.thesis.generator.benchmark.netty.creators;
 
 import de.adrian.thesis.generator.benchmark.javaio.CreatorThread;
+import de.adrian.thesis.generator.benchmark.javaio.ThroughputLoggingThread;
 import de.adrian.thesis.generator.nexmark.NexmarkStreamGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Abstract creator for the NexmarkBenchmark
@@ -14,14 +17,15 @@ public abstract class AbstractNettyCreatorThread extends Thread {
 
     private static final Logger LOG = LogManager.getLogger(AbstractNettyCreatorThread.class);
 
-    private final Queue<String> queue;
+    private final BlockingQueue<String> queue;
     private final AbstractNettyCreatorThreadProperties properties;
 
     private volatile boolean interrupted = false;
+    long counter = 0;
 
-    AbstractNettyCreatorThread(String threadName, Queue<String> queue, AbstractNettyCreatorThreadProperties properties) {
+    AbstractNettyCreatorThread(String threadName, AbstractNettyCreatorThreadProperties properties) {
         super(threadName);
-        this.queue = queue;
+        this.queue = new LinkedBlockingQueue<>();
         this.properties = properties;
     }
 
@@ -29,10 +33,9 @@ public abstract class AbstractNettyCreatorThread extends Thread {
     public void run() {
 
         // Generate initial numbers
-        long counter = 0;
         for (; counter < properties.initialRecords && !interrupted; counter++) {
 
-            String record = generateRecord();
+            String record = generateRecord(counter);
 
             queue.add(record);
 
@@ -43,7 +46,7 @@ public abstract class AbstractNettyCreatorThread extends Thread {
 
         for (; counter < properties.maxNumbers && !interrupted; counter++) {
 
-            String record = generateRecord();
+            String record = generateRecord(counter);
 
             queue.add(record);
 
@@ -60,7 +63,7 @@ public abstract class AbstractNettyCreatorThread extends Thread {
         }
     }
 
-    abstract String generateRecord();
+    abstract String generateRecord(long currentNumber);
 
     abstract long getWaitingDuration();
 
@@ -69,6 +72,10 @@ public abstract class AbstractNettyCreatorThread extends Thread {
     public void stopProducing() {
         interrupt();
         interrupted = true;
+    }
+
+    public BlockingQueue<String> getQueue() {
+        return queue;
     }
 
     public static class AbstractNettyCreatorThreadProperties extends CreatorThread.CreateThreadProperties {

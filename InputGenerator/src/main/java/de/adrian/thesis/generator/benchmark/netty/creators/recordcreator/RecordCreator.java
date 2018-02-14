@@ -1,10 +1,11 @@
-package de.adrian.thesis.generator.benchmark.recordcreator;
+package de.adrian.thesis.generator.benchmark.netty.creators.recordcreator;
 
-public interface RecordCreator<T> {
+public interface RecordCreator {
     /**
      * Creates a new stream record for the given number;
+     *
      * @param number The current stream record number.
      * @return The parametrized return type
      */
-    public T createRecord(long number);
+    String createRecord(long number);
 }
