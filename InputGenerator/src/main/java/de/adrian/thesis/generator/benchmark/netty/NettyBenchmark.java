@@ -51,14 +51,14 @@ public final class NettyBenchmark extends Benchmark {
     @Parameter(names = {"-pD", "--personDelay"}, description = "Sets delay, which the person creator thread should wait")
     private int personDelay = 100;
 
-    @Parameter(names = {"-yD", "--yahooDelay"}, description = "Sets delay, which the yahoo creator thread should wait")
-    private int yahooDelay = 3;
-
     @Parameter(names = {"-seed", "--yahooSeed"}, description = "Sets seed for the yahoo generator")
     private int yahooSeed = 1337;
 
+    @Parameter(names = {"-cN", "--campaignNumber"}, description = "Sets number of campaigns for the yahoo generator")
+    private int numberOfCampaigns = 100;
+
     @Parameter(names = {"-yN", "--yahooGeneratorName"}, description = "Sets the generator for the yahoo benchmark")
-    private String yahooGeneratorName = "independent";
+    private String yahooGeneratorName = "notIndependent";
 
     private NettyBenchmark(String[] args) {
         super(args);
@@ -74,15 +74,16 @@ public final class NettyBenchmark extends Benchmark {
     public void startGenerator() {
 
         LOG.info("Starting NettyBenchmark with maxMessages: {}, initialPersons: {}, auctionDelay: {}, personDelay: {}, " +
-                "yahooDelay: {}, yahooGeneratorName: {}, port: {}, name: {}, timeout: {}",
-                maxNumberOfMessages, initialPersons, auctionDelay, personDelay, yahooDelay, yahooGeneratorName, port, name, serverTimeout);
+                "yahooDelay: {}, delay: {}, port: {}, name: {}, timeout: {}",
+                maxNumberOfMessages, initialPersons, auctionDelay, personDelay, msDelay, yahooGeneratorName, port, name, serverTimeout);
 
         NettyStringCreatorThread.WAITING_DURATION = msDelay;
         NettyAuctionCreatorThread.WAIT_DURATION = auctionDelay;
         NettyPersonCreatorThread.WAIT_DURATION = personDelay;
-        NettyYahooCreatorThread.WAITING_TIME = yahooDelay;
+        NettyYahooCreatorThread.WAITING_TIME = msDelay;
         NettyYahooCreatorThread.INITIAL_SEED = yahooSeed;
         NettyYahooCreatorThread.GENERATOR_NAME = yahooGeneratorName;
+        NettyYahooCreatorThread.NUMBER_OF_CAMPAIGNS = numberOfCampaigns;
 
         AbstractNettyCreatorThread.AbstractNettyCreatorThreadProperties creatorProperties =
                 new AbstractNettyCreatorThread.AbstractNettyCreatorThreadProperties(getCreatorProperties());

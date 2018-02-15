@@ -16,15 +16,17 @@ public class NettyYahooCreatorThread extends AbstractNettyCreatorThread {
 
     public static String GENERATOR_NAME;
 
+    public static long NUMBER_OF_CAMPAIGNS;
+
     private final YahooBenchmarkGenerator yahooBenchmarkGenerator;
 
     public NettyYahooCreatorThread(AbstractNettyCreatorThreadProperties properties) {
         super(THREAD_NAME, properties);
-        if (GENERATOR_NAME.toLowerCase().contains("independent")) {
+        if (GENERATOR_NAME.toLowerCase().equals("independent")) {
             this.yahooBenchmarkGenerator = new YahooIndependentGenerator();
         } else {
             this.yahooBenchmarkGenerator =
-                    new YahooMatchingUUIDGenerator(properties.maxNumbers / 10, INITIAL_SEED);
+                    new YahooMatchingUUIDGenerator(NUMBER_OF_CAMPAIGNS, INITIAL_SEED);
         }
     }
 

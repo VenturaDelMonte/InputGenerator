@@ -31,6 +31,8 @@ import io.netty.util.CharsetUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Creates a newly configured {@link ChannelPipeline} for a new channel.
  */
@@ -46,7 +48,7 @@ public class NettyBenchmarkRequestInitializer<T> extends ChannelInitializer<Sock
     private final AbstractNettyCreatorThread.AbstractNettyCreatorThreadProperties creatorProperties;
     private final ForwardingThread.ForwardingThreadProperties forwardingProperties;
 
-    private int instanceNumber = 0;
+    private AtomicInteger instanceNumber = new AtomicInteger();
 
     NettyBenchmarkRequestInitializer(RecordCreator recordCreator,
                                      AbstractNettyCreatorThread.AbstractNettyCreatorThreadProperties creatorProperties,
@@ -69,7 +71,7 @@ public class NettyBenchmarkRequestInitializer<T> extends ChannelInitializer<Sock
 
         pipeline.addLast("LineEncoder", new LineEncoder(LineSeparator.DEFAULT, CharsetUtil.UTF_8));
 
-        pipeline.addLast(new NettyBenchmarkRequestHandler(recordCreator, creatorProperties, forwardingProperties, instanceNumber++));
+        pipeline.addLast(new NettyBenchmarkRequestHandler(recordCreator, creatorProperties, forwardingProperties, instanceNumber.getAndIncrement()));
     }
 }
 

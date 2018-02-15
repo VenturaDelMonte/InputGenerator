@@ -40,7 +40,7 @@ public abstract class Benchmark<T> {
     protected int msDelay = 50;
 
     @Parameter(names = {"-m", "--maxMessages"}, description = "Max number of messages, that should be sent")
-    protected int maxNumberOfMessages = 500;
+    protected long maxNumberOfMessages = 500;
 
     @Parameter(names = {"-l", "--logMessages"}, description = "Displays log messages for the creation and sending progress")
     private boolean logMessages = false;

@@ -19,36 +19,44 @@ public class YahooMatchingUUIDGenerator extends YahooBenchmarkGenerator {
 
     private final StringBuilder stringBuilder = new StringBuilder(100);
 
-    private final CampaignAd[] campaingsArray;
+    private final CampaignAd[] campaignAds;
     private final int campaignLength;
 
-    private static List<CampaignAd> GenerateCampaignMapping(long numCampaigns, long seed) {
+    private static CampaignAd[] CAMPAIGN_ARRAY;
 
-        Random random = new Random(seed);
+    private static CampaignAd[] GenerateCampaignMapping(long numCampaigns, long seed) {
 
-        byte[] bytes = new byte[7];
+        if (CAMPAIGN_ARRAY == null) {
+            Random random = new Random(seed);
 
-        List<CampaignAd> campaignAds = new ArrayList<>();
+            byte[] bytes = new byte[7];
 
-        for (int i = 0; i < numCampaigns; i++) {
+            List<CampaignAd> campaignAds = new ArrayList<>();
 
-            random.nextBytes(bytes);
-            String campaign = UUID.nameUUIDFromBytes(bytes).toString();
+            for (int i = 0; i < numCampaigns; i++) {
 
-            for (int j = 0; j < NUMBER_OF_ADS_PER_CAMPAIGN; j++) {
                 random.nextBytes(bytes);
-                campaignAds.add(new CampaignAd(UUID.nameUUIDFromBytes(bytes).toString(), campaign));
+                String campaign = UUID.nameUUIDFromBytes(bytes).toString();
+
+                for (int j = 0; j < NUMBER_OF_ADS_PER_CAMPAIGN; j++) {
+                    random.nextBytes(bytes);
+                    campaignAds.add(new CampaignAd(UUID.nameUUIDFromBytes(bytes).toString(), campaign));
+                }
             }
+
+            CAMPAIGN_ARRAY = campaignAds.toArray(new CampaignAd[campaignAds.size()]);
         }
 
-        return campaignAds;
+        return CAMPAIGN_ARRAY;
     }
 
     public YahooMatchingUUIDGenerator(long numberOfCampaigns, long seed) {
-        List<CampaignAd> campaignAds = GenerateCampaignMapping(numberOfCampaigns, seed);
+        this.campaignAds = GenerateCampaignMapping(numberOfCampaigns, seed);
+        this.campaignLength = this.campaignAds.length;
 
-        this.campaingsArray = campaignAds.toArray(new CampaignAd[campaignAds.size()]);
-        this.campaignLength = this.campaingsArray.length;
+        adTypeCounter = new Random().nextInt(AD_TYPE_LENGTH);
+        eventTypeCounter = new Random().nextInt(EVENT_TYPE_LENGTH);
+        campaignLengthCounter = new Random().nextInt(campaignLength);
     }
 
     @Override
@@ -75,7 +83,7 @@ public class YahooMatchingUUIDGenerator extends YahooBenchmarkGenerator {
             timestamp = System.currentTimeMillis();
         }
 
-        String adId = campaingsArray[campaignLengthCounter].adId;
+        String adId = campaignAds[campaignLengthCounter].adId;
         String adType = Constants.AD_TYPES.get(adTypeCounter);
         String eventType = Constants.EVENT_TYPES.get(eventTypeCounter);
 
