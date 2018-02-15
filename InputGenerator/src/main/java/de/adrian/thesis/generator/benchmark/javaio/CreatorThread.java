@@ -51,7 +51,8 @@ public class CreatorThread extends Thread {
             }
 
             try {
-                Thread.sleep(properties.delay);
+                Thread.sleep(properties.messagesPerSecond);
+                throw new IllegalStateException("Currently not functional, look at NettyCreatorThread");
             } catch (InterruptedException e) {
                 LOG.error("CreatorThread was interrupted: {}", e.getLocalizedMessage());
                 break;
@@ -65,13 +66,13 @@ public class CreatorThread extends Thread {
     }
 
     public static class CreateThreadProperties {
-        public int delay = 50;
+        public int messagesPerSecond = 50;
         public long maxNumbers = -1;
         public boolean logMessages = true;
         public int logMessagesModulo = 50;
 
-        public CreateThreadProperties setDelay(int delay) {
-            this.delay = delay;
+        public CreateThreadProperties setMessagesPerSecond(int messagesPerSecond) {
+            this.messagesPerSecond = messagesPerSecond;
             return this;
         }
 

@@ -15,8 +15,6 @@ public class NettyPersonCreatorThread extends AbstractNettyCreatorThread {
 
     private final static String THREAD_NAME = "NettyPersonCreatorThread";
 
-    public static long WAIT_DURATION = 100;
-
     private final NexmarkStreamGenerator nexmarkGenerator;
 
     public NettyPersonCreatorThread(AbstractNettyCreatorThreadProperties properties) {
@@ -27,11 +25,6 @@ public class NettyPersonCreatorThread extends AbstractNettyCreatorThread {
     @Override
     String generateRecord(long currentNumber) {
         return nexmarkGenerator.generatePerson();
-    }
-
-    @Override
-    long getWaitingDuration() {
-        return WAIT_DURATION;
     }
 
     @Override

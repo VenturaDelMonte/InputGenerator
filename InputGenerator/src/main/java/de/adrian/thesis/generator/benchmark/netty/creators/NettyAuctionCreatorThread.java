@@ -12,8 +12,6 @@ public class NettyAuctionCreatorThread extends AbstractNettyCreatorThread {
 
     private final static String THREAD_NAME = "NettyAuctionCreatorThread";
 
-    public static long WAIT_DURATION = 10;
-
     private final NexmarkStreamGenerator nexmarkGenerator;
 
     public NettyAuctionCreatorThread(AbstractNettyCreatorThreadProperties properties) {
@@ -24,11 +22,6 @@ public class NettyAuctionCreatorThread extends AbstractNettyCreatorThread {
     @Override
     String generateRecord(long currentNumber) {
         return nexmarkGenerator.generateAuction();
-    }
-
-    @Override
-    long getWaitingDuration() {
-        return WAIT_DURATION;
     }
 
     @Override

@@ -45,12 +45,6 @@ public final class NettyBenchmark extends Benchmark {
     @Parameter(names = {"-iP", "--initialRecords"}, description = "Set initial people to create")
     private int initialPersons = 50;
 
-    @Parameter(names = {"-aD", "--auctionDelay"}, description = "Sets delay, which the auction creator thread should wait")
-    private int auctionDelay = 10;
-
-    @Parameter(names = {"-pD", "--personDelay"}, description = "Sets delay, which the person creator thread should wait")
-    private int personDelay = 100;
-
     @Parameter(names = {"-seed", "--yahooSeed"}, description = "Sets seed for the yahoo generator")
     private int yahooSeed = 1337;
 
@@ -73,14 +67,10 @@ public final class NettyBenchmark extends Benchmark {
     @Override
     public void startGenerator() {
 
-        LOG.info("Starting NettyBenchmark with maxMessages: {}, initialPersons: {}, auctionDelay: {}, personDelay: {}, " +
-                "yahooDelay: {}, delay: {}, port: {}, name: {}, timeout: {}",
-                maxNumberOfMessages, initialPersons, auctionDelay, personDelay, msDelay, yahooGeneratorName, port, name, serverTimeout);
+        LOG.info("Starting NettyBenchmark with maxMessages: {}, initialPersons: {}, " +
+                        "yahooDelay: {}, messagesPerSecond: {}, port: {}, name: {}, timeout: {}",
+                maxNumberOfMessages, initialPersons, messagesPerSecond, yahooGeneratorName, port, name, serverTimeout);
 
-        NettyStringCreatorThread.WAITING_DURATION = msDelay;
-        NettyAuctionCreatorThread.WAIT_DURATION = auctionDelay;
-        NettyPersonCreatorThread.WAIT_DURATION = personDelay;
-        NettyYahooCreatorThread.WAITING_TIME = msDelay;
         NettyYahooCreatorThread.INITIAL_SEED = yahooSeed;
         NettyYahooCreatorThread.GENERATOR_NAME = yahooGeneratorName;
         NettyYahooCreatorThread.NUMBER_OF_CAMPAIGNS = numberOfCampaigns;

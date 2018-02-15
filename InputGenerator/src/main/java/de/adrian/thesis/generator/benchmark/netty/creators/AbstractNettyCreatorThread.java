@@ -1,12 +1,9 @@
 package de.adrian.thesis.generator.benchmark.netty.creators;
 
 import de.adrian.thesis.generator.benchmark.javaio.CreatorThread;
-import de.adrian.thesis.generator.benchmark.javaio.ThroughputLoggingThread;
-import de.adrian.thesis.generator.nexmark.NexmarkStreamGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -44,28 +41,31 @@ public abstract class AbstractNettyCreatorThread extends Thread {
             }
         }
 
-        for (; counter < properties.maxNumbers && !interrupted; counter++) {
+        while (counter < properties.maxNumbers && !interrupted) {
+            long emitStartTime = System.currentTimeMillis();
 
-            String record = generateRecord(counter);
+            int i = 0;
+            for (; i < properties.messagesPerSecond && counter + i < properties.maxNumbers; i++) {
+                String record = generateRecord(counter);
 
-            queue.add(record);
-
-            if (properties.logMessages && counter % properties.logMessagesModulo == 0) {
-                LOG.info("Inserted '{}' into queue", record);
+                queue.add(record);
             }
 
-            try {
-                Thread.sleep(getWaitingDuration());
-            } catch (InterruptedException e) {
-                LOG.error("NettyCreatorThread was interrupted: {}", e.getLocalizedMessage());
-                break;
+            counter += i;
+
+            long emitTime = System.currentTimeMillis() - emitStartTime;
+            if (emitTime < 1000) {
+                try {
+                    Thread.sleep(1000 - emitTime);
+                } catch (InterruptedException e) {
+                    LOG.error("NettyCreatorThread was interrupted: {}", e.getLocalizedMessage());
+                    break;
+                }
             }
         }
     }
 
     abstract String generateRecord(long currentNumber);
-
-    abstract long getWaitingDuration();
 
     public abstract String getShortDescription();
 
@@ -83,7 +83,7 @@ public abstract class AbstractNettyCreatorThread extends Thread {
         int initialRecords;
 
         public AbstractNettyCreatorThreadProperties(CreatorThread.CreateThreadProperties properties) {
-            this.delay = properties.delay;
+            this.messagesPerSecond = properties.messagesPerSecond;
             this.logMessages = properties.logMessages;
             this.logMessagesModulo = properties.logMessagesModulo;
             this.maxNumbers = properties.maxNumbers;

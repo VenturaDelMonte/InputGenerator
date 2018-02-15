@@ -10,8 +10,6 @@ public class NettyYahooCreatorThread extends AbstractNettyCreatorThread {
 
     private final static String THREAD_NAME = "NettyYahooCreatorThread";
 
-    public static long WAITING_TIME;
-
     public static long INITIAL_SEED;
 
     public static String GENERATOR_NAME;
@@ -33,11 +31,6 @@ public class NettyYahooCreatorThread extends AbstractNettyCreatorThread {
     @Override
     String generateRecord(long currentNumber) {
         return yahooBenchmarkGenerator.getNext();
-    }
-
-    @Override
-    long getWaitingDuration() {
-        return WAITING_TIME;
     }
 
     @Override

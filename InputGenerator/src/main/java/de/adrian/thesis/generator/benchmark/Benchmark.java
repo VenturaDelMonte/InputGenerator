@@ -37,7 +37,7 @@ public abstract class Benchmark<T> {
     private String recordCreatorName = "timestamp";
 
     @Parameter(names = {"-d", "--delay"}, description = "Delay between between insertions of new elements to queue")
-    protected int msDelay = 50;
+    protected int messagesPerSecond = 50;
 
     @Parameter(names = {"-m", "--maxMessages"}, description = "Max number of messages, that should be sent")
     protected long maxNumberOfMessages = 500;
@@ -103,7 +103,7 @@ public abstract class Benchmark<T> {
         CreatorThread.CreateThreadProperties creatorProperties = new CreatorThread.CreateThreadProperties();
 
         return creatorProperties
-                .setDelay(msDelay)
+                .setMessagesPerSecond(messagesPerSecond)
                 .setMaxNumbers(maxNumberOfMessages)
                 .setLogMessages(logMessages)
                 .setLogMessagesModulo(logMessagesModulo);

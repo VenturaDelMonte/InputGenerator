@@ -13,8 +13,6 @@ public class NettyStringCreatorThread extends AbstractNettyCreatorThread {
 
     private final static String THREAD_NAME = "NettyCreatorThread";
 
-    public static long WAITING_DURATION = 10;
-
     private final RecordCreator recordCreator;
 
     public NettyStringCreatorThread(RecordCreator recordCreator, AbstractNettyCreatorThreadProperties properties, long startingNumber) {
@@ -31,11 +29,6 @@ public class NettyStringCreatorThread extends AbstractNettyCreatorThread {
     @Override
     String generateRecord(long currentNumber) {
         return recordCreator.createRecord(currentNumber);
-    }
-
-    @Override
-    long getWaitingDuration() {
-        return WAITING_DURATION;
     }
 
     @Override
