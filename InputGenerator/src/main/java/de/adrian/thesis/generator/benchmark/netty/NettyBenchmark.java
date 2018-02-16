@@ -54,6 +54,9 @@ public final class NettyBenchmark extends Benchmark {
     @Parameter(names = {"-yN", "--yahooGeneratorName"}, description = "Sets the generator for the yahoo benchmark")
     private String yahooGeneratorName = "notIndependent";
 
+    @Parameter(names = {"-mQ", "--maxQueueSize"}, description = "Sets the max queue size to prevent overflows")
+    private int maxQueueSize = 50_000_000;
+
     private NettyBenchmark(String[] args) {
         super(args);
     }
@@ -74,6 +77,7 @@ public final class NettyBenchmark extends Benchmark {
         NettyYahooCreatorThread.INITIAL_SEED = yahooSeed;
         NettyYahooCreatorThread.GENERATOR_NAME = yahooGeneratorName;
         NettyYahooCreatorThread.NUMBER_OF_CAMPAIGNS = numberOfCampaigns;
+        NettyThroughputLoggingThread.MAX_QUEUE_SIZE = maxQueueSize;
 
         AbstractNettyCreatorThread.AbstractNettyCreatorThreadProperties creatorProperties =
                 new AbstractNettyCreatorThread.AbstractNettyCreatorThreadProperties(getCreatorProperties());

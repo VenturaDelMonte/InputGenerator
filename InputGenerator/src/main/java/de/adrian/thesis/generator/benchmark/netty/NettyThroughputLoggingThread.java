@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
+import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
@@ -12,6 +13,11 @@ import java.util.concurrent.atomic.AtomicLong;
 public class NettyThroughputLoggingThread extends Thread {
 
     private static final Logger LOG = LogManager.getLogger(NettyThroughputLoggingThread.class);
+
+    /**
+     * Maximum capacity for {@link java.util.concurrent.LinkedBlockingQueue} - 1000
+     */
+    public static int MAX_QUEUE_SIZE;
 
     private static final Marker THROUGHPUT_MARKER = MarkerManager.getMarker("Throughput");
     private final String instanceName;
@@ -35,6 +41,7 @@ public class NettyThroughputLoggingThread extends Thread {
     public void run() {
 
         long currentTime;
+        int queueSize;
 
         while (true) {
             try {
@@ -43,14 +50,21 @@ public class NettyThroughputLoggingThread extends Thread {
                 // TODO Or use System.nanoTime()? Measure computational overhead
                 currentTime = System.currentTimeMillis();
 
+                queueSize = queue.size();
+
                 LOG.info(THROUGHPUT_MARKER, "{},{},{},{},{},{}",
                         currentTime,
                         instanceName,
                         forwardingIdCreator,
                         forwardingThread.getForwardingId(),
-                        queue.size(),
+                        queueSize,
                         forwardingThread.getCurrentRecords().get());
                 forwardingThread.getCurrentRecords().set(0);
+
+                if (queueSize >= MAX_QUEUE_SIZE) {
+                    queue.clear();
+                    LOG.error("Queue has reached its maximum capacity (ForwardingID {})", forwardingIdCreator);
+                }
 
             } catch (InterruptedException e) {
                 LOG.error("ThroughputLoggingThread was interrupted");
