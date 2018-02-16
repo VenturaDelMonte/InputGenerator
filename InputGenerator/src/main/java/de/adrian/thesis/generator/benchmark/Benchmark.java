@@ -36,7 +36,7 @@ public abstract class Benchmark<T> {
     @Parameter(names = {"-c", "--creator"}, description = "Specifies the record creator this sender should use")
     private String recordCreatorName = "timestamp";
 
-    @Parameter(names = {"-d", "--delay"}, description = "Delay between between insertions of new elements to queue")
+    @Parameter(names = {"-s", "--messagesPerSecond"}, description = "The number of messages per second")
     protected int messagesPerSecond = 50;
 
     @Parameter(names = {"-m", "--maxMessages"}, description = "Max number of messages, that should be sent")
