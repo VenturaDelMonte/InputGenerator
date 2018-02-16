@@ -46,7 +46,7 @@ public abstract class AbstractNettyCreatorThread extends Thread {
 
             int i = 0;
             for (; i < properties.messagesPerSecond && counter + i < properties.maxNumbers; i++) {
-                String record = generateRecord(counter);
+                String record = generateRecord(counter + i);
 
                 queue.add(record);
             }

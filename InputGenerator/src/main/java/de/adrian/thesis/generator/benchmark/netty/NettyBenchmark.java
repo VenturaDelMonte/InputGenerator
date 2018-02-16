@@ -68,7 +68,7 @@ public final class NettyBenchmark extends Benchmark {
     public void startGenerator() {
 
         LOG.info("Starting NettyBenchmark with maxMessages: {}, initialPersons: {}, " +
-                        "yahooDelay: {}, messagesPerSecond: {}, port: {}, name: {}, timeout: {}",
+                        "messagePerSecond: {}, yahooGeneratorName: {}, port: {}, name: {}, timeout: {}",
                 maxNumberOfMessages, initialPersons, messagesPerSecond, yahooGeneratorName, port, name, serverTimeout);
 
         NettyYahooCreatorThread.INITIAL_SEED = yahooSeed;
