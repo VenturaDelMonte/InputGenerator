@@ -17,6 +17,8 @@ public class YahooMatchingUUIDGenerator extends YahooBenchmarkGenerator {
 
     private static final int NUMBER_OF_ADS_PER_CAMPAIGN = 10;
 
+    public static boolean CROP_TIMESTAMPS;
+
     private final StringBuilder stringBuilder = new StringBuilder(100);
 
     private final CampaignAd[] campaignAds;
@@ -78,8 +80,10 @@ public class YahooMatchingUUIDGenerator extends YahooBenchmarkGenerator {
             eventTypeCounter = 0;
         }
 
-        if (timestampCounter >= 1000) {
+        if (CROP_TIMESTAMPS && timestampCounter >= 1000) {
             timestampCounter = 0;
+            timestamp = System.currentTimeMillis();
+        } else {
             timestamp = System.currentTimeMillis();
         }
 

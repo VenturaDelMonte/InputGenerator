@@ -148,7 +148,7 @@ public class NexmarkStreamGenerator {
     /**
      * Generates auctions. Previous note: A Person may be selling items for a different regions.
      * Does not matter for out use case. Schema:
-     * auction_id,item_id,seller_id,price,category_id,quantity,type,start,end
+     * timestamp, auction_id, item_id, seller_id, price, category_id, quantity, type, start, end
      *
      * @param limitAttributes Whether to use the full output
      */
@@ -201,7 +201,7 @@ public class NexmarkStreamGenerator {
 
     /**
      * Generates persons based on the following schema:
-     * person_id,name,email_address,phone,street,city,country,province,zipcode,homepage,creditcard
+     * timestamp, person_id,name,email_address,phone,street,city,country,province,zipcode,homepage,creditcard
      */
     public String generatePerson(boolean limitAttributes) {
         calendar.incrementTime();

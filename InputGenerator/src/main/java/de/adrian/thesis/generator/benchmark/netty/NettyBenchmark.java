@@ -20,6 +20,7 @@ import com.beust.jcommander.Parameter;
 import de.adrian.thesis.generator.benchmark.Benchmark;
 import de.adrian.thesis.generator.benchmark.javaio.ForwardingThread;
 import de.adrian.thesis.generator.benchmark.netty.creators.*;
+import de.adrian.thesis.generator.yahoo.YahooMatchingUUIDGenerator;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.Epoll;
@@ -57,6 +58,9 @@ public final class NettyBenchmark extends Benchmark {
     @Parameter(names = {"-mQ", "--maxQueueSize"}, description = "Sets the max queue size to prevent overflows")
     private int maxQueueSize = 50_000_000;
 
+    @Parameter(names = {"-cT", "--cropTimestamp"}, description = "Crops the timestamps for the Yahoo benchmark to 1 second")
+    private boolean cropTimestamp = false;
+
     private NettyBenchmark(String[] args) {
         super(args);
     }
@@ -78,6 +82,7 @@ public final class NettyBenchmark extends Benchmark {
         NettyYahooCreatorThread.GENERATOR_NAME = yahooGeneratorName;
         NettyYahooCreatorThread.NUMBER_OF_CAMPAIGNS = numberOfCampaigns;
         NettyThroughputLoggingThread.MAX_QUEUE_SIZE = maxQueueSize;
+        YahooMatchingUUIDGenerator.CROP_TIMESTAMPS = cropTimestamp;
 
         AbstractNettyCreatorThread.AbstractNettyCreatorThreadProperties creatorProperties =
                 new AbstractNettyCreatorThread.AbstractNettyCreatorThreadProperties(getCreatorProperties());
