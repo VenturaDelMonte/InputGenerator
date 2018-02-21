@@ -4,11 +4,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
-import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 
 import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class NettyThroughputLoggingThread extends Thread {
 
@@ -22,15 +19,18 @@ public class NettyThroughputLoggingThread extends Thread {
     private static final Marker THROUGHPUT_MARKER = MarkerManager.getMarker("Throughput");
     private final String instanceName;
     private final Queue<String> queue;
-    private final int forwardingIdCreator;
+    private final int queueID;
 
     private NettyStringForwardingThread forwardingThread;
 
-    public NettyThroughputLoggingThread(Queue<String> queue, NettyStringForwardingThread forwardingThread, String instanceName) {
+    public NettyThroughputLoggingThread(Queue<String> queue,
+                                        NettyStringForwardingThread forwardingThread,
+                                        String instanceName,
+                                        int queueId) {
         this.queue = queue;
         this.forwardingThread = forwardingThread;
         this.instanceName = instanceName;
-        this.forwardingIdCreator = forwardingThread.getForwardingId();
+        this.queueID = queueId;
     }
 
     public void setForwardingThread(NettyStringForwardingThread forwardingThread) {
@@ -55,7 +55,7 @@ public class NettyThroughputLoggingThread extends Thread {
                 LOG.info(THROUGHPUT_MARKER, "{},{},{},{},{},{}",
                         currentTime,
                         instanceName,
-                        forwardingIdCreator,
+                        queueID,
                         forwardingThread.getForwardingId(),
                         queueSize,
                         forwardingThread.getCurrentRecords().get());
@@ -63,7 +63,7 @@ public class NettyThroughputLoggingThread extends Thread {
 
                 if (queueSize >= MAX_QUEUE_SIZE) {
                     queue.clear();
-                    LOG.error("Queue has reached its maximum capacity (ForwardingID {})", forwardingIdCreator);
+                    LOG.error("Queue has reached its maximum capacity (QueueID {})", queueID);
                 }
 
             } catch (InterruptedException e) {

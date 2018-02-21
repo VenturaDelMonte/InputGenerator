@@ -73,9 +73,9 @@ public class NettyBenchmarkRequestHandler extends SimpleChannelInboundHandler<St
      * @throws Exception thrown in case of errors
      */
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, String request) throws Exception {
+    public void channelRead0(ChannelHandlerContext ctx, String request) {
 
-        LOG.info("Received '{}'", request);
+        LOG.info("Received '{}' from {}", request, ctx.channel().remoteAddress());
 
         String[] split = request.split(":");
 
@@ -135,7 +135,7 @@ public class NettyBenchmarkRequestHandler extends SimpleChannelInboundHandler<St
         } else {
             forwardingThread = new NettyStringForwardingThread(channel, creatorThread.getQueue(), instanceNumber, forwardingProperties);
 
-            NettyThroughputLoggingThread loggingThread = new NettyThroughputLoggingThread(creatorThread.getQueue(), forwardingThread, instanceName);
+            NettyThroughputLoggingThread loggingThread = new NettyThroughputLoggingThread(creatorThread.getQueue(), forwardingThread, instanceName, sourceID);
 
             creatorThread.start();
             loggingThread.start();
