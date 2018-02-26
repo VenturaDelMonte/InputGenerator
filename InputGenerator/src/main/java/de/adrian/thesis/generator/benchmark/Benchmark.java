@@ -129,10 +129,10 @@ public abstract class Benchmark<T> {
         ctx.reconfigure();
 
         try {
-            File obsoleteThroughputLogFile = new File("logs/${sys:instanceName}-throughput.log");
+            File obsoleteThroughputLogFile = new File("/tmp/bartnik/generator/${sys:instanceName}-throughput.log");
             Files.delete(obsoleteThroughputLogFile.toPath());
 
-            File obsoleteStdoutLogFile = new File("logs/${sys:instanceName}-stdout.log");
+            File obsoleteStdoutLogFile = new File("/tmp/bartnik/generator/${sys:instanceName}-stdout.log");
             Files.delete(obsoleteStdoutLogFile.toPath());
         } catch (IOException exception) {
             LOG.error("Dummy log files have already been deleted.");
