@@ -111,6 +111,9 @@ public class NettyBenchmarkRequestHandler extends SimpleChannelInboundHandler<St
             case "yahoo":
                 creatorThread = new NettyYahooCreatorThread(creatorProperties);
                 break;
+            case "geo":
+                creatorThread = new GeoCreatorThread(creatorProperties);
+                break;
             default:
                 LOG.error("Received illegal command '{}'", request);
                 ctx.close();
