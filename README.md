@@ -1,7 +1,6 @@
 # InputGenerator for my Masterthesis
 
 This project contains various generators, that create random or not-so-random workloads for testing my customized version of [Apache Flink](https://flink.apache.org/).
-Currently, all generators generate data for RabbitMQ, but that might change in the future.
 
 ## Compile Project
 
