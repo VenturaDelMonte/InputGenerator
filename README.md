@@ -9,12 +9,8 @@ Currently, all generators generate data for RabbitMQ, but that might change in t
 
 ## Stand-alone deployment
 
-* For a simple RabbitMQ container, run `sudo docker run -p 5001:15672 -p 5672:5672 --rm rabbitmq:3-management`
 * Run the producer simply via `java -jar build/libs/InputGenerator-1.0-SNAPSHOT.jar -d 1000`
 
-## Docker-compose
-
-* To start the docker container with rabbitMQ, execute `sudo docker-compose up --build --rm`
 
 ## Running the FlinkJob
 
